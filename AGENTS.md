@@ -4,12 +4,23 @@
 
 ### Product
 
-**Lumen Atelier** — Hydrogen headless storefront in this repo (`lumen-atelier` in `package.json`). Development uses **mock.shop** (no live Shopify credentials required for browse/cart flows).
+**Lumen Atelier** — Hydrogen headless storefront in this repo (`lumen-atelier` in `package.json`). **Live Shopify store required** — mock.shop is disabled; missing credentials fail fast with setup instructions.
 
 ### Prerequisites
 
 - **Node.js** 22+ (see `engines` in `package.json`)
-- **Shopify CLI** on PATH: `export PATH="$HOME/.local/bin:$PATH"` (installed globally in this VM via npm)
+- **Shopify CLI** on PATH: `export PATH="$HOME/.local/bin:$PATH"` or use project devDependency via `npx shopify`
+- Linked store credentials in `.env` (`PUBLIC_STORE_DOMAIN`, `PUBLIC_STOREFRONT_API_TOKEN`, `SESSION_SECRET`)
+
+### Store setup (required before dev/build)
+
+```bash
+shopify auth login
+npx shopify hydrogen link
+npx shopify hydrogen env pull --force
+```
+
+Or use npm scripts: `npm run store:link` then `npm run store:env`.
 
 ### Dependency refresh (automatic)
 
@@ -25,7 +36,7 @@ If `package-lock.json` is missing, use `npm install` instead.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
-cd /workspace   # or your clone of Shopify.git
+cd /workspace
 npm run dev
 ```
 
@@ -38,35 +49,25 @@ Use **tmux** for long-running dev servers, e.g. session `hydrogen-dev`.
 ```bash
 npm run lint
 npm run typecheck
-npm run build
+npm run build   # requires live store env in .env
 ```
 
-Hello-world E2E (mock catalog): home → `/products/gray-runners` → POST add-to-cart → `/cart` shows line item and cart count `1`.
-
-### Linking a real store
-
-Requires user/partner credentials outside the VM:
-
-```bash
-shopify auth login
-npx shopify hydrogen link
-```
-
-Set `.env` with `PUBLIC_STORE_DOMAIN`, `PUBLIC_STOREFRONT_API_TOKEN`, and `SESSION_SECRET`. Do not commit `.env`.
+Hello-world E2E (live catalog): home → pick any in-stock product → add to cart → `/cart` shows line item.
 
 ### Gotchas
 
 - Use `http://localhost:3000` (not `127.0.0.1`) if IPv6 binding causes curl issues.
-- Some mock.shop variants are `availableForSale: false` (e.g. Clear Sunnies); use Gray Runners for cart tests.
+- `scripts/ensure-store-env.mjs` runs before `dev` and `build` — no mock fallback.
 - `npm run build` may warn about Hydrogen bundle analyzer / Rolldown — build still succeeds.
+- Do not commit `.env`.
 
 ### Repository
 
-This is the canonical **Lumen Atelier** storefront at [github.com/amjad2161/Shopify](https://github.com/amjad2161/Shopify.git). Originally developed on `amjad2161/Work` branch `cursor/lumen-atelier-shopify-bbe7` and migrated here.
+This is the canonical **Lumen Atelier** storefront at [github.com/amjad2161/Shopify](https://github.com/amjad2161/Shopify.git).
 
 ### Related repos
 
 | Repo | Purpose |
 |------|---------|
 | [amjad2161/Shopify](https://github.com/amjad2161/Shopify) | **This storefront** (canonical codebase) |
-| [amjad2161/Work](https://github.com/amjad2161/Work) | Original development repo (feature branch merged here) |
+| [amjad2161/Work](https://github.com/amjad2161/Work) | Original development repo |

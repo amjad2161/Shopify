@@ -1,6 +1,7 @@
 import * as serverBuild from 'virtual:react-router/server-build';
 import {createRequestHandler, storefrontRedirect} from '@shopify/hydrogen';
 import {createHydrogenRouterContext} from '~/lib/context';
+import {StoreEnvError, storeEnvSetupHtml} from '~/lib/store-env';
 
 /**
  * Export a fetch handler in module format.
@@ -52,6 +53,13 @@ export default {
 
       return response;
     } catch (error) {
+      if (error instanceof StoreEnvError) {
+        return new Response(storeEnvSetupHtml(error), {
+          status: 503,
+          headers: {'Content-Type': 'text/html; charset=utf-8'},
+        });
+      }
+
       console.error(error);
       return new Response('An unexpected error occurred', {status: 500});
     }

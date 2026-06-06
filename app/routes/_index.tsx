@@ -7,7 +7,6 @@ import type {
   RecommendedProductsQuery,
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
-import {MockShopNotice} from '~/components/MockShopNotice';
 import {NewsletterStrip} from '~/components/NewsletterStrip';
 import {BRAND, organizationJsonLd, pageTitle} from '~/lib/brand';
 
@@ -36,7 +35,6 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
   ]);
 
   return {
-    isShopLinked: Boolean(context.env.PUBLIC_STORE_DOMAIN),
     featuredCollection: collections.nodes[0],
   };
 }
@@ -58,7 +56,6 @@ export default function Homepage() {
   const data = useLoaderData<typeof loader>();
   return (
     <div className="home">
-      {data.isShopLinked ? null : <MockShopNotice />}
       <Hero featuredCollection={data.featuredCollection} />
       <FeaturedCollection collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
