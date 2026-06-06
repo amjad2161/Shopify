@@ -13,19 +13,49 @@ Premium headless commerce storefront built with **Shopify Hydrogen** (2026.4), *
 
 ## Quick start (live store)
 
+**Run every command inside the project folder** (the folder that contains `package.json`).  
+If you see `fatal: not a git repository` or `Could not read package.json`, you are in the wrong directory.
+
+### macOS / Linux
+
 ```bash
 git clone https://github.com/amjad2161/Shopify.git
 cd Shopify
 npm install
 cp .env.example .env
 
-# One-time: authenticate and link your Shopify store
-shopify auth login
-npx shopify hydrogen link
-npx shopify hydrogen env pull --force
+# One-time: authenticate and link your Shopify store (from project folder)
+npm run store:setup
 
 npm run dev
 ```
+
+### Windows (PowerShell)
+
+```powershell
+# 1) Clone (skip if you already have the folder)
+cd $HOME
+git clone https://github.com/amjad2161/Shopify.git
+cd Shopify
+
+# 2) Install dependencies — required before ANY shopify command
+npm install
+
+# 3) Create .env from template
+Copy-Item .env.example .env
+
+# 4) One-time store link (run each line; browser opens for login)
+npm exec shopify -- auth login
+npm exec shopify -- hydrogen link
+npm run store:env
+
+# 5) Start dev server
+npm run dev
+```
+
+**Do not run `npx shopify` from `C:\Users\Mobar`** — that installs the wrong npm package (`shopify@4.1.0`). Always `cd` into `Shopify` first and use `npm exec shopify` or `npm run store:*` scripts (they use `@shopify/cli` from this project).
+
+**Node.js:** Install [Node.js 22+](https://nodejs.org/) if `node -v` fails.
 
 Open **http://localhost:3000/** — the storefront loads products, collections, and checkout from your real store.
 
@@ -52,7 +82,7 @@ If store credentials are missing, the app shows a setup page instead of mock dat
 | `PUBLIC_STORE_DOMAIN` | `your-store.myshopify.com` |
 | `PUBLIC_STOREFRONT_API_TOKEN` | Storefront API public token |
 
-Run `npx shopify hydrogen env pull --force` after linking to populate these automatically.
+Run `npm run store:env` after linking to populate these automatically.
 
 ## Brand customization
 
@@ -64,7 +94,7 @@ Hydrogen deploys to **Shopify Oxygen**:
 
 ```bash
 npm run build
-npx shopify hydrogen deploy
+npm exec shopify -- hydrogen deploy
 ```
 
 See [Hydrogen deployment docs](https://shopify.dev/docs/custom-storefronts/hydrogen/deployment).
