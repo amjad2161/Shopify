@@ -14,9 +14,11 @@ Premium headless commerce storefront built with **Shopify Hydrogen** (2026.4), *
 ## Quick start
 
 ```bash
-export PATH="$HOME/.local/bin:$PATH"
-cd /agent/repos/Work   # or your clone of Shopify.git
+git clone https://github.com/amjad2161/Shopify.git
+cd Shopify
 npm install
+cp .env.example .env
+# Set SESSION_SECRET in .env to any long random string (required for local dev)
 npm run dev
 ```
 

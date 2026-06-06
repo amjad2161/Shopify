@@ -967,3 +967,110 @@ button.reset:hover:not(:has(> *)) {
   gap: 0.75rem;
   flex-wrap: wrap;
 }
+
+/*
+* --------------------------------------------------
+* components/AnnouncementBar
+* --------------------------------------------------
+*/
+.announcement-bar {
+  background: var(--color-ink, #0c0a09);
+  color: var(--color-canvas, #faf8f5);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 1rem;
+  text-align: center;
+
+  a {
+    color: var(--color-accent-soft, #fef3c7);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+
+/*
+* --------------------------------------------------
+* components/NewsletterStrip
+* --------------------------------------------------
+*/
+.newsletter-strip {
+  background: var(--color-canvas-deep, #f0ebe3);
+  border-radius: 1rem;
+  margin: 3rem auto;
+  max-width: 72rem;
+  padding: 2.5rem 1.5rem;
+}
+
+.newsletter-strip-inner {
+  align-items: center;
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 48rem) {
+  .newsletter-strip-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.newsletter-strip-eyebrow {
+  color: var(--color-accent, #b45309);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.newsletter-strip-copy h2 {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  margin-bottom: 0.5rem;
+}
+
+.newsletter-strip-copy p:last-child {
+  color: var(--color-ink-muted, #44403c);
+  line-height: 1.5;
+}
+
+.newsletter-strip-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.newsletter-strip-form input {
+  background: var(--color-canvas, #faf8f5);
+  border: 1px solid var(--color-line, #e7e5e4);
+  border-radius: 999px;
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+}
+
+.newsletter-strip-form button {
+  background: var(--color-ink, #0c0a09);
+  border: none;
+  border-radius: 999px;
+  color: var(--color-canvas, #faf8f5);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+}
+
+.newsletter-strip-form button:hover {
+  opacity: 0.92;
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}

@@ -8,12 +8,18 @@ import type {
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {MockShopNotice} from '~/components/MockShopNotice';
-import {BRAND} from '~/lib/brand';
+import {NewsletterStrip} from '~/components/NewsletterStrip';
+import {BRAND, organizationJsonLd, pageTitle} from '~/lib/brand';
 
 export const meta: Route.MetaFunction = () => {
+  const title = pageTitle();
   return [
-    {title: `${BRAND.name} — ${BRAND.tagline}`},
+    {title},
     {name: 'description', content: BRAND.description},
+    {property: 'og:title', content: title},
+    {property: 'og:description', content: BRAND.description},
+    {property: 'og:type', content: 'website'},
+    {name: 'twitter:card', content: 'summary_large_image'},
   ];
 };
 
@@ -56,7 +62,14 @@ export default function Homepage() {
       <Hero featuredCollection={data.featuredCollection} />
       <FeaturedCollection collection={data.featuredCollection} />
       <RecommendedProducts products={data.recommendedProducts} />
+      <NewsletterStrip />
       <EditorialStrip />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationJsonLd()),
+        }}
+      />
     </div>
   );
 }

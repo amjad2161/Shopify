@@ -25,7 +25,7 @@ If `package-lock.json` is missing, use `npm install` instead.
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
-cd /agent/repos/Work
+cd /workspace   # or your clone of Shopify.git
 npm run dev
 ```
 
@@ -60,23 +60,13 @@ Set `.env` with `PUBLIC_STORE_DOMAIN`, `PUBLIC_STOREFRONT_API_TOKEN`, and `SESSI
 - Some mock.shop variants are `availableForSale: false` (e.g. Clear Sunnies); use Gray Runners for cart tests.
 - `npm run build` may warn about Hydrogen bundle analyzer / Rolldown — build still succeeds.
 
-### Pushing to `amjad2161/Shopify`
+### Repository
 
-The storefront lives in **this repo** (`Work`). To mirror it to `Shopify.git`, the cloud agent needs **write** access to that repository (the integration user `cursor[bot]` must be a collaborator with push permission, or a PAT with `repo` scope must be available in the environment).
+This is the canonical **Lumen Atelier** storefront at [github.com/amjad2161/Shopify](https://github.com/amjad2161/Shopify.git). Originally developed on `amjad2161/Work` branch `cursor/lumen-atelier-shopify-bbe7` and migrated here.
 
-Until push works from the VM, land code via the **Work** PR and mirror locally:
+### Related repos
 
-```bash
-git clone https://github.com/amjad2161/Work.git
-cd Work
-git checkout cursor/lumen-atelier-shopify-bbe7   # or main after merge
-git remote add shopify https://github.com/amjad2161/Shopify.git
-git push shopify HEAD:main
-```
-
-### Related repos in workspace
-
-| Path | Purpose |
+| Repo | Purpose |
 |------|---------|
-| `/agent/repos/Work` | **This storefront** (canonical codebase; mirror to `Shopify.git`) |
-| `/agent/repos/amjad2161` | Separate BRAINIAC Python project — not the shop |
+| [amjad2161/Shopify](https://github.com/amjad2161/Shopify) | **This storefront** (canonical codebase) |
+| [amjad2161/Work](https://github.com/amjad2161/Work) | Original development repo (feature branch merged here) |
