@@ -74,6 +74,26 @@ If store credentials are missing, the app shows a setup page instead of mock dat
 | `npm run store:link` | Link Hydrogen to a storefront |
 | `npm run store:env` | Pull Storefront API env vars into `.env` |
 | `npm run store:setup` | Login, link store, and pull env (one-time) |
+| `npm run automate` | Full local automation pipeline (all layers + decision bus) |
+| `npm run automate:ci` | CI-safe pipeline (lint, test, typecheck; env optional) |
+| `npm run automate:full` | Local pipeline + production build when `.env` is valid |
+| `npm run ci` | Alias for `automate:ci` |
+
+## Automation architecture
+
+Each process layer has a dedicated module that publishes signals to a shared bus; a decision engine cross-references them for build/deploy gates.
+
+| Module | Layer | What it checks |
+|--------|-------|----------------|
+| `env` | Store | `.env` presence, live domain, no mock.shop |
+| `brand` | SEO | `PUBLIC_BRAND_URL`, featured collection handle |
+| `security` | Hardening | `.gitignore`, newsletter protections, error boundary |
+| `codegen` | GraphQL | Generated types vs route operations |
+| `store-scripts` | Tooling | `npm exec shopify` patterns, predev gates |
+| `quality` | Code | lint → test → typecheck |
+| `deploy` | Release | Production build (`automate:full` only) |
+
+Reports: `.automation/reports/latest.json` (also uploaded as a CI artifact).
 
 ## Required environment variables
 

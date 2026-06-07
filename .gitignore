@@ -9,3 +9,5 @@ node_modules
 .react-router
 .cursor
 *.tsbuildinfo
+.automation/reports/*
+!.automation/reports/.gitkeep

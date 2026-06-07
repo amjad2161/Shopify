@@ -1,0 +1,41 @@
+name: Automation
+
+on:
+  push:
+    branches: [main, 'cursor/**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: automation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  automate:
+    name: Full automation pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run automation (CI mode)
+        run: npm run automate:ci
+
+      - name: Upload automation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-report
+          path: .automation/reports/latest.json
+          if-no-files-found: ignore

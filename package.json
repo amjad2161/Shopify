@@ -14,9 +14,13 @@
     "lint": "eslint --no-error-on-unmatched-pattern .",
     "typecheck": "react-router typegen && tsc --noEmit",
     "codegen": "shopify hydrogen codegen && react-router typegen",
-    "store:link": "shopify hydrogen link",
-    "store:env": "shopify hydrogen env pull --force",
-    "store:setup": "shopify auth login && shopify hydrogen link && shopify hydrogen env pull --force"
+    "store:link": "npm exec shopify -- hydrogen link",
+    "store:env": "npm exec shopify -- hydrogen env pull --force",
+    "store:setup": "npm exec shopify -- auth login && npm run store:link && npm run store:env",
+    "automate": "node --experimental-strip-types scripts/automation/index.ts",
+    "automate:ci": "node --experimental-strip-types scripts/automation/index.ts --mode=ci",
+    "automate:full": "node --experimental-strip-types scripts/automation/index.ts --mode=full --production",
+    "ci": "npm run automate:ci"
   },
   "prettier": "@shopify/prettier-config",
   "dependencies": {

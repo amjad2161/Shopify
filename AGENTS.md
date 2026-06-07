@@ -44,7 +44,20 @@ Dev server: **http://localhost:3000/** (GraphiQL at `/graphiql`).
 
 Use **tmux** for long-running dev servers, e.g. session `hydrogen-dev`.
 
-### Verify changes
+### Automation (orchestrated pipeline)
+
+Every layer runs its own automation module; results sync to `.automation/reports/latest.json` and a cross-module decision engine gates build/deploy.
+
+```bash
+npm run automate       # local: env + brand + security + codegen + quality
+npm run automate:ci    # CI: quality always; env optional (warn if missing)
+npm run automate:full  # local + production build when .env is valid
+npm run ci             # alias for automate:ci
+```
+
+GitHub Actions workflow `.github/workflows/automation.yml` runs `automate:ci` on push/PR.
+
+### Verify changes (manual)
 
 ```bash
 npm run lint
