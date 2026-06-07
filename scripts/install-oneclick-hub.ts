@@ -7,7 +7,6 @@
  *   npm run setup:all -- --link-store
  *   npm run setup:all -- --catalog-dry-run --skip-build
  */
-import {spawnSync} from 'node:child_process';
 import {copyFileSync, existsSync, readFileSync, writeFileSync} from 'node:fs';
 import {randomBytes} from 'node:crypto';
 import {join} from 'node:path';
@@ -15,7 +14,8 @@ import {
   isPlaceholder,
   parseEnvFile,
   validateStoreEnvRecord,
-} from '../app/lib/store-env.ts';
+} from '../app/lib/store-env';
+import {npmCommand, runCommand, runNpm} from './lib/spawn-npm';
 
 type InstallOptions = {
   skipInstall: boolean;
@@ -91,24 +91,6 @@ function log(phase: string, message: string) {
 
 function logStep(message: string) {
   console.log(`  → ${message}`);
-}
-
-function run(command: string, args: string[], cwd: string, inherit = false) {
-  const result = spawnSync(command, args, {
-    cwd,
-    encoding: 'utf8',
-    stdio: inherit ? 'inherit' : ['ignore', 'pipe', 'pipe'],
-  });
-  return {
-    ok: result.status === 0,
-    status: result.status ?? 1,
-    stdout: (result.stdout ?? '').trim(),
-    stderr: (result.stderr ?? '').trim(),
-  };
-}
-
-function runNpm(script: string, cwd: string, extraArgs: string[] = [], inherit = false) {
-  return run('npm', ['run', script, ...extraArgs], cwd, inherit);
 }
 
 function assertNodeVersion() {
@@ -308,8 +290,8 @@ function main() {
 
   if (!opts.skipInstall) {
     log('install', 'Installing npm dependencies…');
-    const install = run(
-      'npm',
+    const install = runCommand(
+      npmCommand(),
       ['install', '--legacy-peer-deps'],
       cwd,
       true,
@@ -322,7 +304,13 @@ function main() {
     log('install', 'Skipped (--skip-install)');
   }
 
-  bootstrapEnv(cwd);
+  try {
+    bootstrapEnv(cwd);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[setup:env] ${message}`);
+    process.exit(1);
+  }
 
   if (opts.linkStore && !opts.skipStore) {
     log('store', 'Interactive Shopify link (browser may open)…');

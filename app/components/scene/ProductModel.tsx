@@ -1,7 +1,7 @@
 import {Component, useEffect, useMemo, useRef, useState} from 'react';
 import type {ReactNode} from 'react';
 import {useFrame} from '@react-three/fiber';
-import {Center, Float, useGLTF} from '@react-three/drei';
+import {Center, Float, useCursor, useGLTF} from '@react-three/drei';
 import type {Group} from 'three';
 import {staticOrbTransform} from '~/lib/experience-scroll';
 import type {SceneProduct} from '~/lib/three/map-products';
@@ -30,6 +30,7 @@ function ProductModelMesh({
   const scrollProgress = useSceneStore((s) => s.scrollProgress);
   const reducedMotion = useSceneStore((s) => s.reducedMotion);
   const isActive = activeIndex === index;
+  useCursor(hovered);
 
   const cloned = useMemo(() => scene.clone(true), [scene]);
 
@@ -75,11 +76,9 @@ function ProductModelMesh({
         onPointerOver={(event) => {
           event.stopPropagation();
           setHovered(true);
-          document.body.style.cursor = 'pointer';
         }}
         onPointerOut={() => {
           setHovered(false);
-          document.body.style.cursor = 'auto';
         }}
       >
         <Center>
@@ -98,16 +97,17 @@ export function ProductModel({onFailed, ...props}: ProductModelProps) {
     setFailed(false);
   }, [props.product.modelUrl]);
 
-  useEffect(() => {
-    if (failed) onFailed?.();
-  }, [failed, onFailed]);
-
   if (!props.product.modelUrl || failed) {
     return null;
   }
 
   return (
-    <ModelErrorBoundary onError={() => setFailed(true)}>
+    <ModelErrorBoundary
+      onError={() => {
+        onFailed?.();
+        setFailed(true);
+      }}
+    >
       <ProductModelMesh {...props} />
     </ModelErrorBoundary>
   );

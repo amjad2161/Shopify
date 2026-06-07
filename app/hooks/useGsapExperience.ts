@@ -23,7 +23,6 @@ export function useGsapExperience(products: ScrollProduct[]) {
   const rootRef = useRef<HTMLDivElement>(null);
   const setScrollProgress = useSceneStore((s) => s.setScrollProgress);
   const setActiveIndex = useSceneStore((s) => s.setActiveIndex);
-  const setFocus = useSceneStore((s) => s.setFocus);
   const reducedMotion = useSceneStore((s) => s.reducedMotion);
   const productCount = products.length;
 
@@ -31,7 +30,7 @@ export function useGsapExperience(products: ScrollProduct[]) {
     () => {
       if (!rootRef.current || reducedMotion || productCount === 0) return;
 
-      const setters = {setScrollProgress, setActiveIndex, setFocus};
+      const setters = {setScrollProgress, setActiveIndex};
 
       ScrollTrigger.create({
         trigger: rootRef.current,
@@ -49,7 +48,7 @@ export function useGsapExperience(products: ScrollProduct[]) {
   useEffect(() => {
     if (!reducedMotion || productCount === 0) return;
 
-    const setters = {setScrollProgress, setActiveIndex, setFocus};
+    const setters = {setScrollProgress, setActiveIndex};
 
     const tick = () => {
       const root = rootRef.current;
@@ -70,7 +69,6 @@ export function useGsapExperience(products: ScrollProduct[]) {
     products,
     reducedMotion,
     setActiveIndex,
-    setFocus,
     setScrollProgress,
   ]);
 
@@ -87,7 +85,6 @@ export function useGsapExperience(products: ScrollProduct[]) {
         syncScrollToScene(progress, products, {
           setScrollProgress,
           setActiveIndex,
-          setFocus,
         });
       }
     },
@@ -96,7 +93,6 @@ export function useGsapExperience(products: ScrollProduct[]) {
       products,
       reducedMotion,
       setActiveIndex,
-      setFocus,
       setScrollProgress,
     ],
   );

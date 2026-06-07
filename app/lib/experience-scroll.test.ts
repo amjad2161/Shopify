@@ -47,49 +47,40 @@ describe('syncScrollToScene', () => {
   it('updates store setters from scroll progress', () => {
     const setScrollProgress = vi.fn();
     const setActiveIndex = vi.fn();
-    const setFocus = vi.fn();
 
     syncScrollToScene(0.55, products, {
       setScrollProgress,
       setActiveIndex,
-      setFocus,
     });
 
     expect(setScrollProgress).toHaveBeenCalledWith(0.55);
     expect(setActiveIndex).toHaveBeenCalledWith(1);
-    expect(setFocus).toHaveBeenCalledWith(products[1]);
   });
 
   it('clamps progress and focuses the last product at 100%', () => {
     const setScrollProgress = vi.fn();
     const setActiveIndex = vi.fn();
-    const setFocus = vi.fn();
 
     syncScrollToScene(1.2, products, {
       setScrollProgress,
       setActiveIndex,
-      setFocus,
     });
 
     expect(setScrollProgress).toHaveBeenCalledWith(1);
     expect(setActiveIndex).toHaveBeenCalledWith(2);
-    expect(setFocus).toHaveBeenCalledWith(products[2]);
   });
 
   it('no-ops when there are no products', () => {
     const setScrollProgress = vi.fn();
     const setActiveIndex = vi.fn();
-    const setFocus = vi.fn();
 
     syncScrollToScene(0.5, [], {
       setScrollProgress,
       setActiveIndex,
-      setFocus,
     });
 
     expect(setScrollProgress).not.toHaveBeenCalled();
     expect(setActiveIndex).not.toHaveBeenCalled();
-    expect(setFocus).not.toHaveBeenCalled();
   });
 });
 

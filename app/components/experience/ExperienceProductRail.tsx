@@ -1,5 +1,7 @@
 import {useCallback} from 'react';
+import {useAnalytics} from '@shopify/hydrogen';
 import type {SceneProduct} from '~/lib/three/map-products';
+import {publishExperienceEvent} from '~/lib/experience-analytics';
 import {useSceneStore} from '~/stores/useSceneStore';
 import {useI18n} from '~/lib/i18n/I18nProvider';
 
@@ -13,13 +15,22 @@ export function ExperienceProductRail({
   onFocusIndex,
 }: ExperienceProductRailProps) {
   const {t} = useI18n();
+  const {publish} = useAnalytics();
   const activeIndex = useSceneStore((s) => s.activeIndex);
 
   const handleSelect = useCallback(
     (index: number) => {
+      const product = products[index];
+      if (product) {
+        publishExperienceEvent(publish, {
+          event: '3d_orb_focus',
+          handle: product.handle,
+          source: 'rail',
+        });
+      }
       onFocusIndex(index);
     },
-    [onFocusIndex],
+    [onFocusIndex, products, publish],
   );
 
   if (products.length <= 1) return null;

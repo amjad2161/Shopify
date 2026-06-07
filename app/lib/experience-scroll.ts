@@ -7,7 +7,6 @@ export type ScrollProduct = {
 export type ScrollSceneSetters = {
   setScrollProgress: (value: number) => void;
   setActiveIndex: (index: number) => void;
-  setFocus: (focus: ScrollProduct | null) => void;
 };
 
 const BASE_CAMERA: [number, number, number] = [0, 0.4, 7.5];
@@ -45,9 +44,6 @@ export function syncScrollToScene(
     Math.floor(clamped * productCount),
   );
   setters.setActiveIndex(index);
-
-  const product = products[index];
-  setters.setFocus(product ?? null);
 }
 
 export function cameraPositionForScroll(

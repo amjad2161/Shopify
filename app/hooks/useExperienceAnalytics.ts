@@ -8,7 +8,7 @@ import {
 
 /** Emit decile scroll-depth events while the user explores the 3D home. */
 export function useExperienceAnalytics(enabled: boolean) {
-  const {publish, shop, cart} = useAnalytics();
+  const {publish} = useAnalytics();
   const scrollProgress = useSceneStore((s) => s.scrollProgress);
   const lastBucket = useRef(-1);
 
@@ -23,5 +23,5 @@ export function useExperienceAnalytics(enabled: boolean) {
       event: '3d_scroll_depth',
       depth: bucket,
     });
-  }, [enabled, publish, scrollProgress, shop, cart]);
+  }, [enabled, publish, scrollProgress]);
 }

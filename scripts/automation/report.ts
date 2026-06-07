@@ -33,7 +33,7 @@ export function formatConsoleReport(report: AutomationReport) {
   const lines: string[] = [
     '',
     '═'.repeat(60),
-    `  Lumen Atelier automation — mode: ${report.mode}`,
+    `  OneClick Hub automation — mode: ${report.mode}`,
     '═'.repeat(60),
     '',
   ];

@@ -1,6 +1,6 @@
 import {useRef, useState} from 'react';
 import {useFrame} from '@react-three/fiber';
-import {Float, RoundedBox, useTexture} from '@react-three/drei';
+import {Float, RoundedBox, useCursor, useTexture} from '@react-three/drei';
 import type {Group, Mesh, Texture} from 'three';
 import {staticOrbTransform} from '~/lib/experience-scroll';
 import type {SceneProduct} from '~/lib/three/map-products';
@@ -27,6 +27,7 @@ function ProductOrbCore({product, index, onFocus, onOpen, map}: ProductOrbCorePr
   const isMobile = useSceneStore((s) => s.isMobile);
   const isActive = activeIndex === index;
   const enableShadows = !isMobile;
+  useCursor(hovered);
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -75,11 +76,9 @@ function ProductOrbCore({product, index, onFocus, onOpen, map}: ProductOrbCorePr
         onPointerOver={(event) => {
           event.stopPropagation();
           setHovered(true);
-          document.body.style.cursor = 'pointer';
         }}
         onPointerOut={() => {
           setHovered(false);
-          document.body.style.cursor = 'auto';
         }}
       >
         <RoundedBox

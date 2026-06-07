@@ -17,9 +17,23 @@ export type SceneProduct = {
 
 const HUES = [0.08, 0.12, 0.55, 0.72, 0.92, 0.35, 0.48, 0.62];
 
+function formatPriceLabel(amount: string, currencyCode: string): string {
+  const currency = currencyCode.trim() || 'USD';
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 0,
+    }).format(Number(amount));
+  } catch {
+    return `${currency} ${Number(amount).toFixed(0)}`.trim();
+  }
+}
+
 function orbitPosition(index: number, total: number): [number, number, number] {
+  const visibleCount = Math.min(Math.max(total, 1), 8);
   const radius = 2.4 + (index % 3) * 0.35;
-  const angle = (index / Math.max(total, 1)) * Math.PI * 2;
+  const angle = (index / visibleCount) * Math.PI * 2;
   const y = Math.sin(angle * 2) * 0.45;
   return [Math.cos(angle) * radius, y, Math.sin(angle) * radius - 1.2];
 }
@@ -74,7 +88,7 @@ export function mapProductsToScene<T extends MappableProduct>(
     const amount = product.priceRange?.minVariantPrice?.amount;
     const currency = product.priceRange?.minVariantPrice?.currencyCode ?? '';
     const priceLabel =
-      amount != null ? `${currency} ${Number(amount).toFixed(0)}`.trim() : undefined;
+      amount != null ? formatPriceLabel(amount, currency) : undefined;
 
     return {
       id: product.id,
@@ -84,7 +98,7 @@ export function mapProductsToScene<T extends MappableProduct>(
       modelUrl: resolveProductModelUrl(product),
       priceLabel,
       totalInventory: product.totalInventory ?? null,
-      position: orbitPosition(index, products.length),
+      position: orbitPosition(index, Math.min(products.length, 8)),
       hue: HUES[index % HUES.length] ?? 0.5,
     };
   });

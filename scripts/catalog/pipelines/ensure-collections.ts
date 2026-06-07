@@ -37,7 +37,7 @@ export async function ensureCatalogCollections(options: {
           title: vertical.title.en,
           descriptionHtml: `<p>${vertical.description}</p>`,
           seo: {
-            title: `${vertical.title.en} | Lumen Atelier`,
+            title: `${vertical.title.en} | OneClick Hub`,
             description: seoDescription.slice(0, 320),
           },
         },

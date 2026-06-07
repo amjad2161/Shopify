@@ -169,7 +169,7 @@ export function storeEnvSetupHtml(error: StoreEnvError) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Connect your Shopify store — Lumen Atelier</title>
+    <title>Connect your Shopify store — OneClick Hub</title>
     <style>
       body { font-family: system-ui, sans-serif; background: #faf8f5; color: #0c0a09; margin: 0; padding: 2rem; }
       main { max-width: 42rem; margin: 0 auto; background: #fff; border: 1px solid #e7e5e4; border-radius: 1rem; padding: 2rem; }

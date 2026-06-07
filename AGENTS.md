@@ -4,7 +4,7 @@
 
 ### Product
 
-**Lumen Atelier** — Hydrogen headless storefront in this repo (`lumen-atelier` in `package.json`). **Live Shopify store required** — mock.shop is disabled; missing credentials fail fast with setup instructions.
+**OneClick Hub** — Hydrogen headless storefront in this repo (`lumen-atelier` in `package.json`). **Live Shopify store required** — mock.shop is disabled; missing credentials fail fast with setup instructions.
 
 ### Prerequisites
 
@@ -80,7 +80,7 @@ Hello-world E2E (live catalog): home → pick any in-stock product → add to ca
 
 ### Repository
 
-This is the canonical **Lumen Atelier** storefront at [github.com/amjad2161/Shopify](https://github.com/amjad2161/Shopify.git).
+This is the canonical **OneClick Hub** storefront at [github.com/amjad2161/Shopify](https://github.com/amjad2161/Shopify.git).
 
 ### Related repos
 

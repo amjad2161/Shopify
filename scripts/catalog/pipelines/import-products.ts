@@ -180,7 +180,7 @@ async function upsertOneProduct(
       id: existing?.id,
       title: product.title,
       descriptionHtml: product.descriptionHtml,
-      vendor: product.vendor || env.CATALOG_DEFAULT_VENDOR || 'Lumen Atelier',
+      vendor: product.vendor || env.CATALOG_DEFAULT_VENDOR || 'OneClick Hub',
       productType: product.productType,
       tags: [
         ...product.tags,

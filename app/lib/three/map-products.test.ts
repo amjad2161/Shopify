@@ -66,7 +66,7 @@ describe('mapProductsToScene', () => {
     expect(scene[0]?.handle).toBe('orb-lamp');
     expect(scene[0]?.imageUrl).toContain('width=512');
     expect(scene[0]?.imageUrl).toContain('format=webp');
-    expect(scene[0]?.priceLabel).toContain('USD');
+    expect(scene[0]?.priceLabel).toMatch(/129/);
     expect(scene[0]?.totalInventory).toBe(3);
     expect(scene[0]?.position).toHaveLength(3);
     expect(scene[0]?.hue).toBeGreaterThanOrEqual(0);

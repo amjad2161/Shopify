@@ -14,6 +14,7 @@ export type ExperienceAnalyticsPayload = {
   reason?: string;
   from?: string;
   to?: string;
+  source?: string;
 };
 
 type PublishFn = (

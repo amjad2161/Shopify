@@ -11,7 +11,7 @@ import {scoreProducts, filterImportCandidates, rankScoredProducts} from './ai/pr
 import {allCollectionHandles} from './config/categories.ts';
 
 function printHelp() {
-  console.log(`Lumen Atelier — catalog & dropship automation
+  console.log(`OneClick Hub — catalog & dropship automation
 
 Usage:
   npm run catalog:plan
@@ -107,6 +107,7 @@ async function main() {
 
   const trendsOnly =
     process.env.CATALOG_CLI_MODE === 'trends' ||
+    args.includes('--trends') ||
     process.argv[1]?.includes('catalog:trends');
 
   if (planOnly) {

@@ -1,4 +1,4 @@
-import {lazy, Suspense, useCallback, useEffect, useState} from 'react';
+import {lazy, Suspense, useCallback, useEffect, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router';
 import {useAnalytics} from '@shopify/hydrogen';
 import type {
@@ -43,13 +43,17 @@ export function ImmersiveHome({
   const navigate = useNavigate();
   const {path} = useI18n();
   const {publish} = useAnalytics();
-  const sceneProducts = mapProductsToScene(products);
+  const sceneProducts = useMemo(
+    () => mapProductsToScene(products),
+    [products],
+  );
   const {scrollRef, focusAtIndex} = useGsapExperience(sceneProducts);
   const {checked, supported} = useWebGLSupport();
   const [runtimeFallback, setRuntimeFallback] = useState(false);
+  const hasProducts = sceneProducts.length > 0;
 
   useDevice3dProfile();
-  useExperienceAnalytics(!runtimeFallback && supported);
+  useExperienceAnalytics(!runtimeFallback && supported && hasProducts);
 
   useEffect(() => {
     if (!checked || supported) return;
@@ -90,7 +94,7 @@ export function ImmersiveHome({
     [publish],
   );
 
-  if ((checked && !supported) || runtimeFallback) {
+  if ((checked && !supported) || runtimeFallback || !hasProducts) {
     return (
       <ClassicHomepage
         featuredCollection={featuredCollection}
