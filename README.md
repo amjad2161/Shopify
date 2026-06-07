@@ -61,6 +61,28 @@ Open **http://localhost:3000/** — the storefront loads products, collections, 
 
 If store credentials are missing, the app shows a setup page instead of mock data.
 
+### One command — install everything
+
+Runs dependencies, `.env` bootstrap (OneClick Hub + 3D), automation, catalog plan/sync, and prints the architecture map.
+
+```bash
+npm run setup:all
+```
+
+Link your Shopify store during setup (opens browser):
+
+```bash
+npm run setup:all -- --link-store
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\install-oneclick-hub.ps1 --link-store
+```
+
+Useful flags: `--catalog-dry-run`, `--skip-build`, `--ci-only`, `--skip-catalog`. Run `npm run setup:all -- --help` for the full list.
+
 ## Scripts
 
 | Command | Purpose |
@@ -74,6 +96,7 @@ If store credentials are missing, the app shows a setup page instead of mock dat
 | `npm run store:link` | Link Hydrogen to a storefront |
 | `npm run store:env` | Pull Storefront API env vars into `.env` |
 | `npm run store:setup` | Login, link store, and pull env (one-time) |
+| `npm run setup:all` | **Master install** — deps, env, automate, catalog, verification |
 | `npm run automate` | Full local automation pipeline (all layers + decision bus) |
 | `npm run automate:ci` | CI-safe pipeline (lint, test, typecheck; env optional) |
 | `npm run automate:full` | Local pipeline + production build when `.env` is valid |

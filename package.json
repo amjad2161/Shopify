@@ -18,6 +18,7 @@
     "store:link": "npm exec shopify -- hydrogen link",
     "store:env": "npm exec shopify -- hydrogen env pull --force",
     "store:setup": "npm exec shopify -- auth login && npm run store:link && npm run store:env",
+    "setup:all": "node --experimental-strip-types scripts/install-oneclick-hub.ts",
     "automate": "node --experimental-strip-types scripts/automation/index.ts",
     "automate:ci": "node --experimental-strip-types scripts/automation/index.ts --mode=ci",
     "automate:full": "node --experimental-strip-types scripts/automation/index.ts --mode=full --production",
