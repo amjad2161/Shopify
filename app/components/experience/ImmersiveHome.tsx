@@ -67,7 +67,7 @@ export function ImmersiveHome({
 
   const onProductSelect = useCallback(
     (handle: string) => {
-      navigate(path(`/products/${handle}`));
+      void navigate(path(`/products/${handle}`));
     },
     [navigate, path],
   );

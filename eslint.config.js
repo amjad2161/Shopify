@@ -33,6 +33,8 @@ export default [
       '**/packages/hydrogen/dist/',
       'scripts/automation/**',
       'scripts/catalog/**',
+      'e2e/**',
+      'playwright.config.ts',
     ],
   },
   ...fixupConfigRules(
@@ -235,6 +237,34 @@ export default [
     files: ['**/*.server.*'],
     rules: {
       'react-hooks/rules-of-hooks': 'off',
+    },
+  },
+  {
+    files: [
+      'app/components/scene/**/*.{ts,tsx}',
+      'app/components/product/ProductViewerCanvas.tsx',
+    ],
+    rules: {
+      // @react-three/fiber extends JSX with Three.js element props
+      'react/no-unknown-property': [
+        'error',
+        {
+          ignore: [
+            'args',
+            'attach',
+            'castShadow',
+            'emissive',
+            'emissiveIntensity',
+            'intensity',
+            'map',
+            'metalness',
+            'object',
+            'position',
+            'roughness',
+            'shadow-mapSize',
+          ],
+        },
+      ],
     },
   },
 ];

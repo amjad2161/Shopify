@@ -1,4 +1,5 @@
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import {Component, useEffect, useMemo, useRef, useState} from 'react';
+import type {ReactNode} from 'react';
 import {useFrame} from '@react-three/fiber';
 import {Center, Float, useGLTF} from '@react-three/drei';
 import type {Group} from 'three';
@@ -92,8 +93,8 @@ export function ProductModel({onFailed, ...props}: ProductModelProps) {
   );
 }
 
-class ModelErrorBoundary extends React.Component<
-  {children: React.ReactNode; onError: () => void},
+class ModelErrorBoundary extends Component<
+  {children: ReactNode; onError: () => void},
   {hasError: boolean}
 > {
   state = {hasError: false};
