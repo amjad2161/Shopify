@@ -8,7 +8,9 @@ import type {
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {NewsletterStrip} from '~/components/NewsletterStrip';
+import {ImmersiveHome} from '~/components/experience/ImmersiveHome';
 import {BRAND, organizationJsonLd, resolveBrandUrl} from '~/lib/brand';
+import {isImmersive3dEnabled} from '~/lib/experience';
 import type {StoreEnvRecord} from '~/lib/store-env';
 import {
   findLocaleByPath,
@@ -66,6 +68,9 @@ export async function loader(args: Route.LoaderArgs) {
     ...deferredData,
     ...criticalData,
     brandUrl: resolveBrandUrl(args.context.env),
+    immersive3d: isImmersive3dEnabled(
+      args.context.env as unknown as StoreEnvRecord,
+    ),
   };
 }
 
@@ -116,6 +121,36 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+
+  if (data.immersive3d) {
+    return (
+      <>
+        <Suspense
+          fallback={
+            <div className="experience-shell">
+              <div className="experience-canvas-fallback" />
+            </div>
+          }
+        >
+          <Await resolve={data.recommendedProducts}>
+            {(response) => (
+              <ImmersiveHome
+                products={response?.products.nodes ?? []}
+                collectionHandle={data.featuredCollection?.handle}
+              />
+            )}
+          </Await>
+        </Suspense>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationJsonLd(data.brandUrl)),
+          }}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="home">
       <Hero featuredCollection={data.featuredCollection} />

@@ -9,6 +9,12 @@ import '@total-typescript/ts-reset';
 interface Env extends HydrogenEnv {
   /** Public storefront URL for SEO (defaults to https://{PUBLIC_STORE_DOMAIN}) */
   PUBLIC_BRAND_URL?: string;
+  /** Display name override (default: OneClick Hub) */
+  PUBLIC_BRAND_NAME?: string;
+  PUBLIC_BRAND_TAGLINE?: string;
+  PUBLIC_BRAND_DESCRIPTION?: string;
+  /** Enable full-screen 3D homepage (1 | true | yes) */
+  PUBLIC_3D_EXPERIENCE?: string;
   /** Shopify collection handle for the homepage feature block */
   FEATURED_COLLECTION_HANDLE?: string;
   /** Comma-separated collection handles — first entry pins the homepage hero */

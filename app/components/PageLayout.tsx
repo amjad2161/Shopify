@@ -1,5 +1,7 @@
-import {Await, Link} from 'react-router';
+import {Await, Link, useLocation, useRouteLoaderData} from 'react-router';
 import {Suspense, useId} from 'react';
+import type {RootLoader} from '~/root';
+import {isImmersiveHomePath} from '~/lib/experience';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -31,26 +33,37 @@ export function PageLayout({
   isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
+  const location = useLocation();
+  const root = useRouteLoaderData<RootLoader>('root');
+  const immersiveHome =
+    Boolean(root?.immersive3dEnabled) && isImmersiveHomePath(location.pathname);
+
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      <AnnouncementBar />
-      {header && (
-        <Header
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
-      )}
-      <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      <div className={immersiveHome ? 'layout--immersive' : undefined}>
+        <CartAside cart={cart} />
+        <SearchAside />
+        <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+        <AnnouncementBar />
+        {header && (
+          <Header
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+          />
+        )}
+        <main className={immersiveHome ? 'main--immersive' : undefined}>
+          {children}
+        </main>
+        {!immersiveHome ? (
+          <Footer
+            footer={footer}
+            header={header}
+            publicStoreDomain={publicStoreDomain}
+          />
+        ) : null}
+      </div>
     </Aside.Provider>
   );
 }

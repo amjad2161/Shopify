@@ -15,7 +15,10 @@ import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
+import experienceStyles from '~/styles/experience.css?url';
 import tailwindCss from './styles/tailwind.css?url';
+import {isImmersive3dEnabled} from '~/lib/experience';
+import type {StoreEnvRecord} from '~/lib/store-env';
 import {PageLayout} from './components/PageLayout';
 import {BRAND, resolveBrandUrl} from '~/lib/brand';
 import {I18nProvider} from '~/lib/i18n/I18nProvider';
@@ -79,6 +82,7 @@ export function links() {
       href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap',
     },
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {rel: 'stylesheet', href: experienceStyles},
   ];
 }
 
@@ -97,6 +101,7 @@ export async function loader(args: Route.LoaderArgs) {
     ...criticalData,
     locale,
     brandUrl: resolveBrandUrl(env),
+    immersive3dEnabled: isImmersive3dEnabled(env as unknown as StoreEnvRecord),
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
