@@ -587,6 +587,35 @@ button.reset:hover:not(:has(> *)) {
   margin: 0;
 }
 
+.featured-collection-empty {
+  background: var(--color-canvas-deep, #f0ebe3);
+  border: 1px dashed var(--color-line, #e7e5e4);
+  border-radius: 1rem;
+  margin: 2rem auto;
+  max-width: 42rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.featured-collection-empty h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin: 0.35rem 0 0.75rem;
+}
+
+.featured-collection-empty p {
+  color: var(--color-ink-muted, #44403c);
+  line-height: 1.55;
+  margin: 0 auto 1rem;
+  max-width: 32rem;
+}
+
+.featured-collection-empty code {
+  background: var(--color-canvas, #faf8f5);
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  padding: 0.1rem 0.35rem;
+}
+
 .featured-collection-link {
   display: inline-block;
   font-size: 0.9rem;
@@ -620,6 +649,13 @@ button.reset:hover:not(:has(> *)) {
   color: var(--color-ink-muted, #44403c);
   line-height: 1.6;
   margin-top: 0.65rem;
+}
+
+.recommended-products-empty {
+  color: var(--color-ink-muted, #44403c);
+  line-height: 1.55;
+  margin: 0;
+  text-align: center;
 }
 
 .recommended-products-loading {
@@ -998,6 +1034,26 @@ button.reset:hover:not(:has(> *)) {
 
 .newsletter-strip-form button:hover {
   opacity: 0.92;
+}
+
+.newsletter-strip-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.newsletter-strip-status {
+  font-size: 0.9rem;
+  grid-column: 1 / -1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.newsletter-strip-status-success {
+  color: var(--color-ink-muted, #44403c);
+}
+
+.newsletter-strip-status-error {
+  color: #b91c1c;
 }
 
 .sr-only {

@@ -1,6 +1,25 @@
+import {useEffect, useRef} from 'react';
+import {useFetcher} from 'react-router';
 import {BRAND} from '~/lib/brand';
 
+type NewsletterActionData = {
+  ok?: boolean;
+  error?: string;
+  message?: string;
+};
+
 export function NewsletterStrip() {
+  const fetcher = useFetcher<NewsletterActionData>();
+  const formRef = useRef<HTMLFormElement>(null);
+  const isSubmitting = fetcher.state !== 'idle';
+  const response = fetcher.data;
+
+  useEffect(() => {
+    if (fetcher.state === 'idle' && response?.ok) {
+      formRef.current?.reset();
+    }
+  }, [fetcher.state, response?.ok]);
+
   return (
     <section className="newsletter-strip" aria-labelledby="newsletter-heading">
       <div className="newsletter-strip-inner">
@@ -14,10 +33,11 @@ export function NewsletterStrip() {
             offers — no noise, just craft.
           </p>
         </div>
-        <form
+        <fetcher.Form
+          ref={formRef}
           className="newsletter-strip-form"
-          action="/pages/contact"
-          method="get"
+          method="post"
+          action="/newsletter"
         >
           <label className="sr-only" htmlFor="newsletter-email">
             Email address
@@ -29,9 +49,28 @@ export function NewsletterStrip() {
             autoComplete="email"
             placeholder="you@example.com"
             required
+            disabled={isSubmitting}
+            aria-invalid={response?.ok === false}
+            aria-describedby={
+              response?.message || response?.error ? 'newsletter-status' : undefined
+            }
           />
-          <button type="submit">Subscribe</button>
-        </form>
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Subscribing…' : 'Subscribe'}
+          </button>
+        </fetcher.Form>
+        {(response?.message || response?.error) && (
+          <p
+            id="newsletter-status"
+            className={`newsletter-strip-status ${
+              response.ok ? 'newsletter-strip-status-success' : 'newsletter-strip-status-error'
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            {response.ok ? response.message : response.error}
+          </p>
+        )}
       </div>
     </section>
   );

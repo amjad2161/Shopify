@@ -17,7 +17,7 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
-import {BRAND} from '~/lib/brand';
+import {BRAND, resolveBrandUrl} from '~/lib/brand';
 
 export type RootLoader = typeof loader;
 
@@ -92,6 +92,7 @@ export async function loader(args: Route.LoaderArgs) {
   return {
     ...deferredData,
     ...criticalData,
+    brandUrl: resolveBrandUrl(env),
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -203,6 +204,7 @@ export default function App() {
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  const showDetails = import.meta.env.DEV;
   let errorMessage = 'Unknown error';
   let errorStatus = 500;
 
@@ -219,8 +221,12 @@ export function ErrorBoundary() {
         {BRAND.name}
       </p>
       <h1 className="font-display mt-4 text-4xl">Something went wrong</h1>
-      <p className="mt-2 text-[var(--color-ink-muted)]">Error {errorStatus}</p>
-      {errorMessage && (
+      <p className="mt-2 text-[var(--color-ink-muted)]">
+        {errorStatus === 404
+          ? 'We could not find that page.'
+          : 'Please try again in a moment.'}
+      </p>
+      {showDetails && errorMessage && (
         <pre className="mt-6 overflow-x-auto rounded-lg bg-[var(--color-canvas-deep)] p-4 text-left text-sm">
           {errorMessage}
         </pre>

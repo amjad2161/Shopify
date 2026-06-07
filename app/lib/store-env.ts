@@ -26,7 +26,7 @@ export class StoreEnvError extends Error {
 
     super(
       `Live Shopify store configuration required (${parts.join('; ')}). ` +
-        'Run: shopify auth login && npx shopify hydrogen link && npx shopify hydrogen env pull',
+        'Run: npm exec shopify -- auth login && npm run store:link && npm run store:env',
     );
     this.name = 'StoreEnvError';
     this.missingKeys = missingKeys;
@@ -34,41 +34,28 @@ export class StoreEnvError extends Error {
   }
 }
 
-function isPlaceholder(value: string) {
+export function isPlaceholder(value: string) {
   const trimmed = value.trim();
   return !trimmed || PLACEHOLDER_PATTERNS.some((pattern) => pattern.test(trimmed));
 }
 
-function isMockDomain(value: string) {
+export function isMockDomain(value: string) {
   return value.trim().toLowerCase().includes('mock.shop');
 }
 
-/**
- * Fills checkout-related env from the live store domain so Hydrogen never
- * defaults analytics/CSP checkout hosts to mock.shop.
- */
-export function normalizeStoreEnv(env: Env): Env {
-  const storeDomain = env.PUBLIC_STORE_DOMAIN?.trim();
-  const checkoutDomain = env.PUBLIC_CHECKOUT_DOMAIN?.trim();
-
-  if (!storeDomain) {
-    return env;
-  }
-
-  if (checkoutDomain && !isMockDomain(checkoutDomain)) {
-    return env;
-  }
-
-  return {
-    ...env,
-    PUBLIC_CHECKOUT_DOMAIN: storeDomain,
-  };
+/** Storefront API host must be the *.myshopify.com admin domain. */
+export function isValidStoreDomain(value: string) {
+  const domain = value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  return /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(domain);
 }
 
-/**
- * Ensures the app never runs against mock.shop or without a linked live store.
- */
-export function validateStoreEnv(env: Env) {
+export function normalizeStoreDomain(value: string) {
+  return value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
+export type StoreEnvRecord = Record<string, string | undefined>;
+
+export function validateStoreEnvRecord(env: StoreEnvRecord) {
   const missingKeys: string[] = [];
   const invalidKeys: string[] = [];
 
@@ -82,7 +69,7 @@ export function validateStoreEnv(env: Env) {
     if (key === 'PUBLIC_STORE_DOMAIN') {
       if (isMockDomain(value)) {
         invalidKeys.push(`${key} (mock.shop is disabled)`);
-      } else if (!value.includes('.myshopify.com') && !value.includes('.')) {
+      } else if (!isValidStoreDomain(value)) {
         invalidKeys.push(`${key} (expected your-store.myshopify.com)`);
       }
     }
@@ -98,8 +85,75 @@ export function validateStoreEnv(env: Env) {
   }
 
   if (missingKeys.length || invalidKeys.length) {
-    throw new StoreEnvError(missingKeys, invalidKeys);
+    return new StoreEnvError(missingKeys, invalidKeys);
   }
+
+  return null;
+}
+
+/**
+ * Fills checkout-related env from the live store domain so Hydrogen never
+ * defaults analytics/CSP checkout hosts to mock.shop.
+ */
+export function normalizeStoreEnv(env: Env): Env {
+  const storeDomain = env.PUBLIC_STORE_DOMAIN?.trim();
+  const checkoutDomain = env.PUBLIC_CHECKOUT_DOMAIN?.trim();
+
+  if (!storeDomain) {
+    return env;
+  }
+
+  if (checkoutDomain && !isMockDomain(checkoutDomain)) {
+    return {
+      ...env,
+      PUBLIC_STORE_DOMAIN: normalizeStoreDomain(storeDomain),
+    };
+  }
+
+  return {
+    ...env,
+    PUBLIC_STORE_DOMAIN: normalizeStoreDomain(storeDomain),
+    PUBLIC_CHECKOUT_DOMAIN: normalizeStoreDomain(storeDomain),
+  };
+}
+
+/**
+ * Ensures the app never runs against mock.shop or without a linked live store.
+ */
+export function validateStoreEnv(env: Env) {
+  const error = validateStoreEnvRecord(env as unknown as StoreEnvRecord);
+  if (error) {
+    throw error;
+  }
+}
+
+export function parseEnvFile(content: string): StoreEnvRecord {
+  const env: StoreEnvRecord = {};
+
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+
+    const index = trimmed.indexOf('=');
+    if (index === -1) {
+      env[trimmed] = '';
+      continue;
+    }
+
+    const key = trimmed.slice(0, index).trim();
+    let value = trimmed.slice(index + 1).trim();
+
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    env[key] = value;
+  }
+
+  return env;
 }
 
 export function storeEnvSetupHtml(error: StoreEnvError) {
@@ -134,14 +188,14 @@ export function storeEnvSetupHtml(error: StoreEnvError) {
       <ol>
         ${missing}
         ${invalid}
-        <li>Authenticate: <code>shopify auth login</code></li>
-        <li>Link Hydrogen: <code>npx shopify hydrogen link</code></li>
-        <li>Pull env vars: <code>npx shopify hydrogen env pull --force</code></li>
+        <li>Authenticate: <code>npm exec shopify -- auth login</code></li>
+        <li>Link Hydrogen: <code>npm run store:link</code></li>
+        <li>Pull env vars: <code>npm run store:env</code></li>
         <li>Restart: <code>npm run dev</code></li>
       </ol>
-      <pre>shopify auth login
-npx shopify hydrogen link
-npx shopify hydrogen env pull --force
+      <pre>npm exec shopify -- auth login
+npm run store:link
+npm run store:env
 npm run dev</pre>
     </main>
   </body>

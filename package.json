@@ -5,8 +5,9 @@
   "version": "2026.4.2",
   "type": "module",
   "scripts": {
-    "predev": "node scripts/ensure-store-env.mjs",
-    "prebuild": "node scripts/ensure-store-env.mjs",
+    "predev": "node --experimental-strip-types scripts/ensure-store-env.ts",
+    "prebuild": "node --experimental-strip-types scripts/ensure-store-env.ts",
+    "test": "vitest run",
     "build": "shopify hydrogen build --codegen",
     "dev": "shopify hydrogen dev --codegen",
     "preview": "shopify hydrogen preview --build",
@@ -61,7 +62,8 @@
     "graphql-config": "^5.0.3",
     "prettier": "^3.4.2",
     "typescript": "^5.9.2",
-    "vite": "^8.0.1"
+    "vite": "^8.0.1",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": "^22 || ^24"

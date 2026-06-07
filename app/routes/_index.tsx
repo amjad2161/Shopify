@@ -8,11 +8,22 @@ import type {
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {NewsletterStrip} from '~/components/NewsletterStrip';
-import {BRAND, organizationJsonLd, pageTitle} from '~/lib/brand';
+import {BRAND, organizationJsonLd, pageTitle, resolveBrandUrl} from '~/lib/brand';
+import type {StoreEnvRecord} from '~/lib/store-env';
 
-export const meta: Route.MetaFunction = () => {
+const DEFAULT_FEATURED_COLLECTION_HANDLE = 'frontpage';
+
+function getFeaturedCollectionHandle(env: Env) {
+  const record = env as unknown as StoreEnvRecord;
+  return record.FEATURED_COLLECTION_HANDLE?.trim();
+}
+
+export const meta: Route.MetaFunction = ({data}) => {
   const title = pageTitle();
-  return [
+  const image = data?.featuredCollection?.image?.url;
+  const brandUrl = data?.brandUrl;
+
+  const tags = [
     {title},
     {name: 'description', content: BRAND.description},
     {property: 'og:title', content: title},
@@ -20,22 +31,59 @@ export const meta: Route.MetaFunction = () => {
     {property: 'og:type', content: 'website'},
     {name: 'twitter:card', content: 'summary_large_image'},
   ];
+
+  if (brandUrl) {
+    tags.push({property: 'og:url', content: brandUrl});
+  }
+
+  if (image) {
+    tags.push({property: 'og:image', content: image});
+    tags.push({name: 'twitter:image', content: image});
+  }
+
+  return tags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
 
-  return {...deferredData, ...criticalData};
+  return {
+    ...deferredData,
+    ...criticalData,
+    brandUrl: resolveBrandUrl(args.context.env),
+  };
 }
 
 async function loadCriticalData({context}: Route.LoaderArgs) {
-  const [{collections}] = await Promise.all([
-    context.storefront.query(FEATURED_COLLECTION_QUERY),
-  ]);
+  const featuredHandle =
+    getFeaturedCollectionHandle(context.env) ||
+    DEFAULT_FEATURED_COLLECTION_HANDLE;
+
+  const collectionByHandle = await context.storefront
+    .query(FEATURED_COLLECTION_BY_HANDLE_QUERY, {
+      variables: {handle: featuredHandle},
+    })
+    .catch((error: Error) => {
+      console.error(error);
+      return null;
+    });
+
+  let featuredCollection = collectionByHandle?.collection ?? null;
+
+  if (!featuredCollection) {
+    const fallback = await context.storefront
+      .query(FEATURED_COLLECTION_FALLBACK_QUERY)
+      .catch((error: Error) => {
+        console.error(error);
+        return null;
+      });
+
+    featuredCollection = fallback?.collections?.nodes?.[0] ?? null;
+  }
 
   return {
-    featuredCollection: collections.nodes[0],
+    featuredCollection,
   };
 }
 
@@ -64,7 +112,7 @@ export default function Homepage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationJsonLd()),
+          __html: JSON.stringify(organizationJsonLd(data.brandUrl)),
         }}
       />
     </div>
@@ -74,9 +122,9 @@ export default function Homepage() {
 function Hero({
   featuredCollection,
 }: {
-  featuredCollection: FeaturedCollectionFragment;
+  featuredCollection: FeaturedCollectionFragment | null;
 }) {
-  const collectionHandle = featuredCollection?.handle ?? 'frontpage';
+  const collectionHandle = featuredCollection?.handle ?? 'all';
 
   return (
     <section className="hero" aria-labelledby="hero-heading">
@@ -91,12 +139,14 @@ function Hero({
           <Link className="hero-cta hero-cta-primary" to="/collections/all">
             Shop the edit
           </Link>
-          <Link
-            className="hero-cta hero-cta-secondary"
-            to={`/collections/${collectionHandle}`}
-          >
-            Featured collection
-          </Link>
+          {featuredCollection ? (
+            <Link
+              className="hero-cta hero-cta-secondary"
+              to={`/collections/${collectionHandle}`}
+            >
+              Featured collection
+            </Link>
+          ) : null}
         </div>
       </div>
       <div className="hero-visual" aria-hidden="true">
@@ -112,10 +162,26 @@ function Hero({
 function FeaturedCollection({
   collection,
 }: {
-  collection: FeaturedCollectionFragment;
+  collection: FeaturedCollectionFragment | null;
 }) {
-  if (!collection) return null;
-  const image = collection?.image;
+  if (!collection) {
+    return (
+      <section className="featured-collection-empty" aria-live="polite">
+        <p className="featured-collection-eyebrow">Curated collection</p>
+        <h2 className="font-display">Collections are on the way</h2>
+        <p>
+          Publish a collection in Shopify admin — set{' '}
+          <code>FEATURED_COLLECTION_HANDLE</code> in <code>.env</code> to pin the
+          homepage feature.
+        </p>
+        <Link className="featured-collection-link" to="/collections/all">
+          Browse all products →
+        </Link>
+      </section>
+    );
+  }
+
+  const image = collection.image;
   return (
     <Link
       className="featured-collection"
@@ -163,19 +229,30 @@ function RecommendedProducts({
       </div>
       <Suspense fallback={<div className="recommended-products-loading">Curating…</div>}>
         <Await resolve={products}>
-          {(response) => (
-            <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product, index) => (
-                    <ProductItem
-                      key={product.id}
-                      product={product}
-                      loading={index < 4 ? 'eager' : 'lazy'}
-                    />
-                  ))
-                : null}
-            </div>
-          )}
+          {(response) => {
+            const nodes = response?.products.nodes ?? [];
+
+            if (!nodes.length) {
+              return (
+                <p className="recommended-products-empty" role="status">
+                  Products will appear here once your catalog is published in
+                  Shopify admin.
+                </p>
+              );
+            }
+
+            return (
+              <div className="recommended-products-grid">
+                {nodes.map((product, index) => (
+                  <ProductItem
+                    key={product.id}
+                    product={product}
+                    loading={index < 4 ? 'eager' : 'lazy'}
+                  />
+                ))}
+              </div>
+            );
+          }}
         </Await>
       </Suspense>
     </section>
@@ -192,18 +269,18 @@ function EditorialStrip() {
         </article>
         <article>
           <h3 className="font-display">Shipped with care</h3>
-          <p>Plastic-free packaging and tracked delivery on every order.</p>
+          <p>Thoughtful packaging and tracked delivery when your store offers it.</p>
         </article>
         <article>
-          <h3 className="font-display">Easy returns</h3>
-          <p>30-day returns on unworn pieces — because fit should feel right.</p>
+          <h3 className="font-display">Shop with confidence</h3>
+          <p>Return and shipping policies follow your live Shopify checkout settings.</p>
         </article>
       </div>
     </section>
   );
 }
 
-const FEATURED_COLLECTION_QUERY = `#graphql
+const FEATURED_COLLECTION_FRAGMENT = `#graphql
   fragment FeaturedCollection on Collection {
     id
     title
@@ -216,7 +293,23 @@ const FEATURED_COLLECTION_QUERY = `#graphql
     }
     handle
   }
-  query FeaturedCollection($country: CountryCode, $language: LanguageCode)
+` as const;
+
+const FEATURED_COLLECTION_BY_HANDLE_QUERY = `#graphql
+  query FeaturedCollectionByHandle(
+    $handle: String!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    collection(handle: $handle) {
+      ...FeaturedCollection
+    }
+  }
+  ${FEATURED_COLLECTION_FRAGMENT}
+` as const;
+
+const FEATURED_COLLECTION_FALLBACK_QUERY = `#graphql
+  query FeaturedCollectionFallback($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
     collections(first: 1, sortKey: UPDATED_AT, reverse: true) {
       nodes {
@@ -224,6 +317,7 @@ const FEATURED_COLLECTION_QUERY = `#graphql
       }
     }
   }
+  ${FEATURED_COLLECTION_FRAGMENT}
 ` as const;
 
 const RECOMMENDED_PRODUCTS_QUERY = `#graphql
@@ -247,7 +341,7 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
   }
   query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    products(first: 8, sortKey: UPDATED_AT, reverse: true) {
+    products(first: 8, sortKey: BEST_SELLING) {
       nodes {
         ...RecommendedProduct
       }

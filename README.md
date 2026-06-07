@@ -69,6 +69,7 @@ If store credentials are missing, the app shows a setup page instead of mock dat
 | `npm run build` | Production client + worker bundle |
 | `npm run preview` | Preview production build |
 | `npm run lint` | ESLint |
+| `npm run test` | Unit tests (store env + brand helpers) |
 | `npm run typecheck` | React Router typegen + `tsc` |
 | `npm run store:link` | Link Hydrogen to a storefront |
 | `npm run store:env` | Pull Storefront API env vars into `.env` |
@@ -83,6 +84,23 @@ If store credentials are missing, the app shows a setup page instead of mock dat
 | `PUBLIC_STOREFRONT_API_TOKEN` | Storefront API public token |
 
 Run `npm run store:env` after linking to populate these automatically.
+
+### Optional environment variables
+
+| Variable | Description |
+|----------|-------------|
+| `PUBLIC_BRAND_URL` | Canonical public URL for SEO / Open Graph (defaults to `https://{PUBLIC_STORE_DOMAIN}`) |
+| `FEATURED_COLLECTION_HANDLE` | Collection handle for the homepage hero feature (default: `frontpage`) |
+
+## Shopify admin checklist
+
+Before launch, confirm in your linked Shopify admin:
+
+1. **Navigation** — Online Store → Navigation: menus with handles `main-menu` (header) and `footer` (footer), or update handles in `app/root.tsx`.
+2. **Featured collection** — Create or publish a collection and set `FEATURED_COLLECTION_HANDLE` in `.env` (or use Shopify’s default `frontpage` collection).
+3. **Catalog** — Publish products so the homepage “Pieces we return to” grid and collection pages are populated.
+4. **Newsletter** — The footer signup posts to `/newsletter` and creates a customer with `acceptsMarketing: true` via the Storefront API. Configure marketing consent and privacy copy in admin as needed.
+5. **Policies** — Shipping, returns, and checkout policies in Shopify flow through to checkout; editorial copy on the homepage does not hard-code policy terms.
 
 ## Brand customization
 

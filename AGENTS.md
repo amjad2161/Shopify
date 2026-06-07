@@ -15,12 +15,12 @@
 ### Store setup (required before dev/build)
 
 ```bash
-shopify auth login
-npx shopify hydrogen link
-npx shopify hydrogen env pull --force
+npm exec shopify -- auth login
+npm run store:link
+npm run store:env
 ```
 
-Or use npm scripts: `npm run store:link` then `npm run store:env`.
+Or one-shot: `npm run store:setup`.
 
 ### Dependency refresh (automatic)
 
@@ -48,6 +48,7 @@ Use **tmux** for long-running dev servers, e.g. session `hydrogen-dev`.
 
 ```bash
 npm run lint
+npm run test
 npm run typecheck
 npm run build   # requires live store env in .env
 ```
@@ -57,7 +58,9 @@ Hello-world E2E (live catalog): home → pick any in-stock product → add to ca
 ### Gotchas
 
 - Use `http://localhost:3000` (not `127.0.0.1`) if IPv6 binding causes curl issues.
-- `scripts/ensure-store-env.mjs` runs before `dev` and `build` — no mock fallback.
+- `scripts/ensure-store-env.ts` runs before `dev` and `build` — no mock fallback.
+- Optional env: `PUBLIC_BRAND_URL`, `FEATURED_COLLECTION_HANDLE` (see `.env.example`).
+- Newsletter signup: `POST /newsletter` → Storefront API `customerCreate` with `acceptsMarketing: true`.
 - `npm run build` may warn about Hydrogen bundle analyzer / Rolldown — build still succeeds.
 - Do not commit `.env`.
 
