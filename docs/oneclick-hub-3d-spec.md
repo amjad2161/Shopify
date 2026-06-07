@@ -145,6 +145,16 @@ model3dMetafield: metafield(namespace: "custom", key: "model_3d") {
 }
 ```
 
+## CI — build עם חנות חיה (אופציונלי)
+
+כשמוגדרים ב-GitHub repository secrets:
+
+- `SESSION_SECRET`
+- `PUBLIC_STORE_DOMAIN`
+- `PUBLIC_STOREFRONT_API_TOKEN`
+
+ה-workflow `store-build` מריץ `npm run build` אחרי ה-pipeline האוטומטי. ללא secrets — השלב מדולג.
+
 ## המשך פיתוח אופציונלי
 
 1. A/B מדידה: conversion rate immersive מול classic
