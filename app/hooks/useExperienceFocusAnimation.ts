@@ -1,5 +1,5 @@
 import {useEffect, useRef} from 'react';
-import gsap from 'gsap';
+import {gsap} from 'gsap';
 import {useSceneStore} from '~/stores/useSceneStore';
 
 /** Subtle reward animation when the active product focus changes. */

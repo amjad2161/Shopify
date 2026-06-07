@@ -1,6 +1,6 @@
 import {useEffect, useRef} from 'react';
 import {useLocation} from 'react-router';
-import gsap from 'gsap';
+import {gsap} from 'gsap';
 import {useAnalytics} from '@shopify/hydrogen';
 import {publishExperienceEvent} from '~/lib/experience-analytics';
 

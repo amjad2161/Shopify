@@ -240,6 +240,12 @@ export default [
     },
   },
   {
+    files: ['scripts/install-oneclick-hub.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
     files: [
       'app/components/scene/**/*.{ts,tsx}',
       'app/components/product/ProductViewerCanvas.tsx',

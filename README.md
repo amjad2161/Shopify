@@ -1,6 +1,6 @@
-# Lumen Atelier — Shopify Hydrogen Storefront
+# OneClick Hub — Immersive Shopify Hydrogen Storefront
 
-Premium headless commerce storefront built with **Shopify Hydrogen** (2026.4), **React Router 7**, **TypeScript**, and **Tailwind CSS v4**. This project is **production-only**: it requires a linked live Shopify store and never falls back to mock.shop.
+**OneClick Hub** is a premium headless commerce storefront built with **Shopify Hydrogen** (2026.4), **React Router 7**, **TypeScript**, and **Tailwind CSS v4**. When `PUBLIC_3D_EXPERIENCE=1`, the homepage becomes a full-screen Pixar-style 3D discovery experience (Three.js, GSAP, Draco-compressed GLBs). This project is **production-only**: it requires a linked live Shopify store and never falls back to mock.shop.
 
 ## Stack
 
@@ -142,6 +142,7 @@ Run `npm run store:env` after linking to populate these automatically.
 
 | Variable | Description |
 |----------|-------------|
+| `PUBLIC_3D_EXPERIENCE` | Set to `1` to enable the immersive 3D homepage (default on via `setup:all`) |
 | `PUBLIC_BRAND_URL` | Canonical public URL for SEO / Open Graph (defaults to `https://{PUBLIC_STORE_DOMAIN}`) |
 | `FEATURED_COLLECTION_HANDLE` | Collection handle for the homepage hero feature (default: `frontpage`) |
 | `FEATURED_COLLECTION_HANDLES` | Comma-separated handles for homepage featured collections |
