@@ -1,12 +1,15 @@
 import {createAutomationBus} from './bus.ts';
 import {isBlocked, isDeployReady, synthesizeDecisions} from './decision-engine.ts';
 import {brandModule} from './modules/brand.ts';
+import {catalogConfigModule} from './modules/catalog-config.ts';
+import {catalogHealthModule} from './modules/catalog-health.ts';
 import {codegenModule} from './modules/codegen.ts';
 import {deployModule} from './modules/deploy.ts';
 import {envModule, readEnvContext} from './modules/env.ts';
 import {qualityModule} from './modules/quality.ts';
 import {securityModule} from './modules/security.ts';
 import {storeScriptsModule} from './modules/store-scripts.ts';
+import {supplierEnvModule} from './modules/supplier-env.ts';
 import {formatConsoleReport, summarizeModules, writeReport} from './report.ts';
 import type {
   AutomationContext,
@@ -18,9 +21,12 @@ import type {
 const ALL_MODULES: AutomationModule[] = [
   envModule,
   brandModule,
+  catalogConfigModule,
+  supplierEnvModule,
   securityModule,
   codegenModule,
   storeScriptsModule,
+  catalogHealthModule,
   qualityModule,
   deployModule,
 ];

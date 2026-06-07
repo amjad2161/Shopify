@@ -16,7 +16,8 @@
     "dist",
     "build",
     "packages/**/dist/**/*",
-    "scripts/automation/**/*"
+    "scripts/automation/**/*",
+    "scripts/catalog/**/*"
   ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],

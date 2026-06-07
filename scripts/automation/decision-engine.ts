@@ -75,6 +75,33 @@ export function synthesizeDecisions(
     });
   }
 
+  const catalogErrors = errors.filter((s) =>
+    ['supplier-env', 'catalog-health'].includes(s.module),
+  );
+  if (catalogErrors.length > 0 && ctx.mode !== 'ci') {
+    decisions.push({
+      id: 'catalog-pipeline',
+      severity: 'error',
+      action: 'block',
+      reason: 'Catalog sync is misconfigured — fix Admin API token or supplier credentials',
+      sources: ['supplier-env', 'catalog-health'],
+    });
+  }
+
+  const catalogWarns = warns.filter((s) =>
+    ['catalog-config', 'catalog-health', 'supplier-env'].includes(s.module),
+  );
+  if (catalogWarns.length > 0) {
+    decisions.push({
+      id: 'catalog-compliance',
+      severity: 'warn',
+      action: 'warn',
+      reason:
+        'Catalog automation warnings — review age-restricted verticals and supplier setup before live import',
+      sources: [...new Set(catalogWarns.map((s) => s.module))],
+    });
+  }
+
   const canBuild =
     ctx.envValid &&
     moduleFails.length === 0 &&

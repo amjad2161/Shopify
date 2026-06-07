@@ -72,7 +72,8 @@ Hello-world E2E (live catalog): home → pick any in-stock product → add to ca
 
 - Use `http://localhost:3000` (not `127.0.0.1`) if IPv6 binding causes curl issues.
 - `scripts/ensure-store-env.ts` runs before `dev` and `build` — no mock fallback.
-- Optional env: `PUBLIC_BRAND_URL`, `FEATURED_COLLECTION_HANDLE` (see `.env.example`).
+- Optional env: `PUBLIC_BRAND_URL`, `FEATURED_COLLECTION_HANDLE`, `FEATURED_COLLECTION_HANDLES` (see `.env.example`).
+- **Catalog automation** (`scripts/catalog/`): `npm run catalog:plan` | `catalog:sync` | `catalog:categories`. Requires `SHOPIFY_ADMIN_ACCESS_TOKEN` for live writes; set `CATALOG_SYNC_ENABLED=1` to import. Example feed: `scripts/catalog/feeds/example-products.csv`. Age-restricted verticals import as DRAFT.
 - Newsletter signup: `POST /newsletter` → Storefront API `customerCreate` with `acceptsMarketing: true`.
 - `npm run build` may warn about Hydrogen bundle analyzer / Rolldown — build still succeeds.
 - Do not commit `.env`.

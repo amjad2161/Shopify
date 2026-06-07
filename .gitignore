@@ -11,3 +11,5 @@ node_modules
 *.tsbuildinfo
 .automation/reports/*
 !.automation/reports/.gitkeep
+.catalog/reports/*
+!.catalog/reports/.gitkeep

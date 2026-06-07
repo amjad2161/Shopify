@@ -32,6 +32,7 @@ export default [
       '**/.react-router/',
       '**/packages/hydrogen/dist/',
       'scripts/automation/**',
+      'scripts/catalog/**',
     ],
   },
   ...fixupConfigRules(

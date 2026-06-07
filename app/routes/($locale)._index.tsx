@@ -22,6 +22,11 @@ const DEFAULT_FEATURED_COLLECTION_HANDLE = 'frontpage';
 
 function getFeaturedCollectionHandle(env: Env) {
   const record = env as unknown as StoreEnvRecord;
+  const multi = record.FEATURED_COLLECTION_HANDLES?.trim();
+  if (multi) {
+    const first = multi.split(',')[0]?.trim();
+    if (first) return first;
+  }
   return record.FEATURED_COLLECTION_HANDLE?.trim();
 }
 

@@ -69,7 +69,7 @@ If store credentials are missing, the app shows a setup page instead of mock dat
 | `npm run build` | Production client + worker bundle |
 | `npm run preview` | Preview production build |
 | `npm run lint` | ESLint |
-| `npm run test` | Unit tests (store env + brand helpers) |
+| `npm run test` | Unit tests (store env, brand, catalog taxonomy, fulfillment) |
 | `npm run typecheck` | React Router typegen + `tsc` |
 | `npm run store:link` | Link Hydrogen to a storefront |
 | `npm run store:env` | Pull Storefront API env vars into `.env` |
@@ -78,6 +78,9 @@ If store credentials are missing, the app shows a setup page instead of mock dat
 | `npm run automate:ci` | CI-safe pipeline (lint, test, typecheck; env optional) |
 | `npm run automate:full` | Local pipeline + production build when `.env` is valid |
 | `npm run ci` | Alias for `automate:ci` |
+| `npm run catalog:plan` | Preview catalog taxonomy, suppliers, and sync readiness |
+| `npm run catalog:sync` | Sync collections + import products (Admin API) |
+| `npm run catalog:categories` | Create/update Shopify collections only |
 
 ## Automation architecture
 
@@ -87,6 +90,9 @@ Each process layer has a dedicated module that publishes signals to a shared bus
 |--------|-------|----------------|
 | `env` | Store | `.env` presence, live domain, no mock.shop |
 | `brand` | SEO | `PUBLIC_BRAND_URL`, featured collection handle |
+| `catalog-config` | Catalog | Commerce vertical taxonomy (13 categories) |
+| `supplier-env` | Catalog | Supplier CSV/API credential checks |
+| `catalog-health` | Catalog | Sync readiness, age-restricted compliance warnings |
 | `security` | Hardening | `.gitignore`, newsletter protections, error boundary |
 | `codegen` | GraphQL | Generated types vs route operations |
 | `store-scripts` | Tooling | `npm exec shopify` patterns, predev gates |
@@ -111,6 +117,34 @@ Run `npm run store:env` after linking to populate these automatically.
 |----------|-------------|
 | `PUBLIC_BRAND_URL` | Canonical public URL for SEO / Open Graph (defaults to `https://{PUBLIC_STORE_DOMAIN}`) |
 | `FEATURED_COLLECTION_HANDLE` | Collection handle for the homepage hero feature (default: `frontpage`) |
+| `FEATURED_COLLECTION_HANDLES` | Comma-separated handles for homepage featured collections |
+| `SHOPIFY_ADMIN_ACCESS_TOKEN` | Admin API token (`write_products`, `write_collections`) for catalog sync |
+| `CATALOG_SYNC_ENABLED` | Set to `1` to allow live catalog import (default off) |
+| `CATALOG_DRY_RUN` | Set to `1` to preview sync without Admin writes |
+| `CATALOG_SUPPLIER_CSV_PATH` | Path to CSV product feed (see `scripts/catalog/feeds/example-products.csv`) |
+
+## Catalog & dropship automation
+
+Automated pipeline under `scripts/catalog/` builds **13 high-demand verticals** (beauty, women, tech, gaming, baby, kids, apparel, underwear, lingerie, adults-only, home, fitness, trending) as Shopify collections and imports products from external suppliers.
+
+**Fulfillment model:** `source_seller` — each imported product stores `lumen_dropship.*` metafields (`source_platform`, `source_seller_id`, `source_product_id`). On order, line items route back to the original seller for shipping; tracking syncs to Shopify. See `scripts/catalog/fulfillment/routing.ts`.
+
+```bash
+# Preview plan (no Admin API required)
+npm run catalog:plan
+
+# Dry-run with example CSV feed
+CATALOG_SUPPLIER_CSV_PATH=scripts/catalog/feeds/example-products.csv npm run catalog:sync
+
+# Live sync (requires Admin token + CATALOG_SYNC_ENABLED=1)
+CATALOG_SYNC_ENABLED=1 npm run catalog:sync
+```
+
+Age-restricted verticals (`lingerie-intimates`, `adults-only`) import as **DRAFT** with `age-18-plus` tags — enable age gates and confirm Shopify Acceptable Use Policy before publishing.
+
+Supplier adapters: `csv_feed` (ready), plus stubs for CJ, Spocket, AliExpress, Amazon, Etsy, Temu, Printful, eBay, and generic REST APIs. Wire credentials in `.env` per platform.
+
+Reports: `.catalog/reports/latest.json`
 
 ## Shopify admin checklist
 
