@@ -32,6 +32,9 @@ npm run dev
 
 ### Windows (PowerShell)
 
+**Important:** Run all commands from inside the `Shopify` project folder (where `package.json` lives).  
+If you see `ENOENT: no such file or directory, open '...\package.json'`, you are in the wrong directory (for example `C:\Users\Mobar`).
+
 ```powershell
 # 1) Clone (skip if you already have the folder)
 cd $HOME
@@ -75,10 +78,11 @@ Link your Shopify store during setup (opens browser):
 npm run setup:all -- --link-store
 ```
 
-Windows PowerShell:
+Windows PowerShell (from the `Shopify` folder):
 
 ```powershell
-.\scripts\install-oneclick-hub.ps1 --link-store
+.\setup.ps1 --link-store
+# or: .\scripts\install-oneclick-hub.ps1 --link-store
 ```
 
 Useful flags: `--catalog-dry-run`, `--skip-build`, `--ci-only`, `--skip-catalog`. Run `npm run setup:all -- --help` for the full list.

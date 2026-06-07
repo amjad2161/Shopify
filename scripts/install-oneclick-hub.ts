@@ -122,6 +122,32 @@ function assertNodeVersion() {
   log('preflight', `Node ${process.versions.node} OK`);
 }
 
+function assertProjectRoot(cwd: string) {
+  const packageJson = join(cwd, 'package.json');
+  if (existsSync(packageJson)) {
+    log('preflight', `Project root OK (${cwd})`);
+    return;
+  }
+  console.error(`
+[setup:preflight] package.json not found in: ${cwd}
+
+You are not in the OneClick Hub / Shopify project folder.
+npm must be run from the directory that contains package.json.
+
+Windows (PowerShell):
+  cd $HOME
+  git clone https://github.com/amjad2161/Shopify.git
+  cd Shopify
+  .\\setup.ps1 --link-store
+
+macOS / Linux:
+  git clone https://github.com/amjad2161/Shopify.git
+  cd Shopify
+  npm run setup:all -- --link-store
+`);
+  process.exit(1);
+}
+
 function uncommentEnvKey(content: string, key: string): string {
   const commented = new RegExp(`^#\\s*(${key}=.*)$`, 'm');
   return content.replace(commented, '$1');
@@ -278,6 +304,7 @@ function main() {
 `);
 
   assertNodeVersion();
+  assertProjectRoot(cwd);
 
   if (!opts.skipInstall) {
     log('install', 'Installing npm dependencies…');
