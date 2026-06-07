@@ -386,12 +386,28 @@ export type FeaturedCollectionFragment = Pick<
   >;
 };
 
-export type FeaturedCollectionQueryVariables = StorefrontAPI.Exact<{
+export type FeaturedCollectionByHandleQueryVariables = StorefrontAPI.Exact<{
+  handle: StorefrontAPI.Scalars['String']['input'];
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
 }>;
 
-export type FeaturedCollectionQuery = {
+export type FeaturedCollectionByHandleQuery = {
+  collection?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
+      image?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+      >;
+    }
+  >;
+};
+
+export type FeaturedCollectionFallbackQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type FeaturedCollectionFallbackQuery = {
   collections: {
     nodes: Array<
       Pick<StorefrontAPI.Collection, 'id' | 'title' | 'handle'> & {
@@ -408,7 +424,7 @@ export type FeaturedCollectionQuery = {
 
 export type RecommendedProductFragment = Pick<
   StorefrontAPI.Product,
-  'id' | 'title' | 'handle'
+  'id' | 'title' | 'handle' | 'totalInventory'
 > & {
   priceRange: {
     minVariantPrice: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
@@ -416,6 +432,19 @@ export type RecommendedProductFragment = Pick<
   featuredImage?: StorefrontAPI.Maybe<
     Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
   >;
+  media: {
+    nodes: Array<
+      | {__typename: 'ExternalVideo' | 'MediaImage' | 'Video'}
+      | ({__typename: 'Model3d'} & {
+          sources: Array<
+            Pick<StorefrontAPI.Model3dSource, 'url' | 'format' | 'mimeType'>
+          >;
+        })
+    >;
+  };
+  model3dMetafield?: StorefrontAPI.Maybe<{
+    reference?: StorefrontAPI.Maybe<Pick<StorefrontAPI.GenericFile, 'url'>>;
+  }>;
 };
 
 export type RecommendedProductsQueryVariables = StorefrontAPI.Exact<{
@@ -426,7 +455,10 @@ export type RecommendedProductsQueryVariables = StorefrontAPI.Exact<{
 export type RecommendedProductsQuery = {
   products: {
     nodes: Array<
-      Pick<StorefrontAPI.Product, 'id' | 'title' | 'handle'> & {
+      Pick<
+        StorefrontAPI.Product,
+        'id' | 'title' | 'handle' | 'totalInventory'
+      > & {
         priceRange: {
           minVariantPrice: Pick<
             StorefrontAPI.MoneyV2,
@@ -439,6 +471,24 @@ export type RecommendedProductsQuery = {
             'id' | 'url' | 'altText' | 'width' | 'height'
           >
         >;
+        media: {
+          nodes: Array<
+            | {__typename: 'ExternalVideo' | 'MediaImage' | 'Video'}
+            | ({__typename: 'Model3d'} & {
+                sources: Array<
+                  Pick<
+                    StorefrontAPI.Model3dSource,
+                    'url' | 'format' | 'mimeType'
+                  >
+                >;
+              })
+          >;
+        };
+        model3dMetafield?: StorefrontAPI.Maybe<{
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.GenericFile, 'url'>
+          >;
+        }>;
       }
     >;
   };
@@ -732,6 +782,21 @@ export type CatalogQuery = {
   };
 };
 
+export type NewsletterCustomerCreateMutationVariables = StorefrontAPI.Exact<{
+  input: StorefrontAPI.CustomerCreateInput;
+}>;
+
+export type NewsletterCustomerCreateMutation = {
+  customerCreate?: StorefrontAPI.Maybe<{
+    customer?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.Customer, 'id' | 'acceptsMarketing'>
+    >;
+    customerUserErrors: Array<
+      Pick<StorefrontAPI.CustomerUserError, 'code' | 'field' | 'message'>
+    >;
+  }>;
+};
+
 export type PageQueryVariables = StorefrontAPI.Exact<{
   language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
   country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
@@ -836,11 +901,25 @@ export type ProductFragment = Pick<
   | 'title'
   | 'vendor'
   | 'handle'
+  | 'totalInventory'
   | 'descriptionHtml'
   | 'description'
   | 'encodedVariantExistence'
   | 'encodedVariantAvailability'
 > & {
+  media: {
+    nodes: Array<
+      | {__typename: 'ExternalVideo' | 'MediaImage' | 'Video'}
+      | ({__typename: 'Model3d'} & {
+          sources: Array<
+            Pick<StorefrontAPI.Model3dSource, 'url' | 'format' | 'mimeType'>
+          >;
+        })
+    >;
+  };
+  model3dMetafield?: StorefrontAPI.Maybe<{
+    reference?: StorefrontAPI.Maybe<Pick<StorefrontAPI.GenericFile, 'url'>>;
+  }>;
   options: Array<
     Pick<StorefrontAPI.ProductOption, 'name'> & {
       optionValues: Array<
@@ -950,11 +1029,25 @@ export type ProductQuery = {
       | 'title'
       | 'vendor'
       | 'handle'
+      | 'totalInventory'
       | 'descriptionHtml'
       | 'description'
       | 'encodedVariantExistence'
       | 'encodedVariantAvailability'
     > & {
+      media: {
+        nodes: Array<
+          | {__typename: 'ExternalVideo' | 'MediaImage' | 'Video'}
+          | ({__typename: 'Model3d'} & {
+              sources: Array<
+                Pick<StorefrontAPI.Model3dSource, 'url' | 'format' | 'mimeType'>
+              >;
+            })
+        >;
+      };
+      model3dMetafield?: StorefrontAPI.Maybe<{
+        reference?: StorefrontAPI.Maybe<Pick<StorefrontAPI.GenericFile, 'url'>>;
+      }>;
       options: Array<
         Pick<StorefrontAPI.ProductOption, 'name'> & {
           optionValues: Array<
@@ -1276,11 +1369,15 @@ interface GeneratedQueryTypes {
     return: FooterQuery;
     variables: FooterQueryVariables;
   };
-  '#graphql\n  fragment FeaturedCollection on Collection {\n    id\n    title\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    handle\n  }\n  query FeaturedCollection($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...FeaturedCollection\n      }\n    }\n  }\n': {
-    return: FeaturedCollectionQuery;
-    variables: FeaturedCollectionQueryVariables;
+  '#graphql\n  query FeaturedCollectionByHandle(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      ...FeaturedCollection\n    }\n  }\n  #graphql\n  fragment FeaturedCollection on Collection {\n    id\n    title\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    handle\n  }\n\n': {
+    return: FeaturedCollectionByHandleQuery;
+    variables: FeaturedCollectionByHandleQueryVariables;
   };
-  '#graphql\n  fragment RecommendedProduct on Product {\n    id\n    title\n    handle\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n  }\n  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    products(first: 8, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...RecommendedProduct\n      }\n    }\n  }\n': {
+  '#graphql\n  query FeaturedCollectionFallback($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    collections(first: 1, sortKey: UPDATED_AT, reverse: true) {\n      nodes {\n        ...FeaturedCollection\n      }\n    }\n  }\n  #graphql\n  fragment FeaturedCollection on Collection {\n    id\n    title\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    handle\n  }\n\n': {
+    return: FeaturedCollectionFallbackQuery;
+    variables: FeaturedCollectionFallbackQueryVariables;
+  };
+  '#graphql\n  fragment RecommendedProduct on Product {\n    id\n    title\n    handle\n    totalInventory\n    priceRange {\n      minVariantPrice {\n        amount\n        currencyCode\n      }\n    }\n    featuredImage {\n      id\n      url\n      altText\n      width\n      height\n    }\n    media(first: 5) {\n      nodes {\n        __typename\n        ... on Model3d {\n          sources {\n            url\n            format\n            mimeType\n          }\n        }\n      }\n    }\n    model3dMetafield: metafield(namespace: "custom", key: "model_3d") {\n      reference {\n        ... on GenericFile {\n          url\n        }\n      }\n    }\n  }\n  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)\n    @inContext(country: $country, language: $language) {\n    products(first: 8, sortKey: BEST_SELLING) {\n      nodes {\n        ...RecommendedProduct\n      }\n    }\n  }\n': {
     return: RecommendedProductsQuery;
     variables: RecommendedProductsQueryVariables;
   };
@@ -1320,7 +1417,7 @@ interface GeneratedQueryTypes {
     return: PoliciesQuery;
     variables: PoliciesQueryVariables;
   };
-  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {\n      ...ProductVariant\n    }\n    adjacentVariants (selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n  }\n\n\n': {
+  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    totalInventory\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    media(first: 5) {\n      nodes {\n        __typename\n        ... on Model3d {\n          sources {\n            url\n            format\n            mimeType\n          }\n        }\n      }\n    }\n    model3dMetafield: metafield(namespace: "custom", key: "model_3d") {\n      reference {\n        ... on GenericFile {\n          url\n        }\n      }\n    }\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {\n      ...ProductVariant\n    }\n    adjacentVariants (selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n  }\n\n\n': {
     return: ProductQuery;
     variables: ProductQueryVariables;
   };
@@ -1334,7 +1431,12 @@ interface GeneratedQueryTypes {
   };
 }
 
-interface GeneratedMutationTypes {}
+interface GeneratedMutationTypes {
+  '#graphql\n  mutation NewsletterCustomerCreate($input: CustomerCreateInput!) {\n    customerCreate(input: $input) {\n      customer {\n        id\n        acceptsMarketing\n      }\n      customerUserErrors {\n        code\n        field\n        message\n      }\n    }\n  }\n': {
+    return: NewsletterCustomerCreateMutation;
+    variables: NewsletterCustomerCreateMutationVariables;
+  };
+}
 
 declare module '@shopify/hydrogen' {
   interface StorefrontQueries extends GeneratedQueryTypes {}

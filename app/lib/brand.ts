@@ -1,17 +1,37 @@
 import {isPlaceholder, isValidStoreDomain, normalizeStoreDomain} from '~/lib/store-env';
 
 export const BRAND = {
-  name: 'Lumen Atelier',
-  tagline: 'Objects of light, craft, and quiet luxury.',
+  name: 'OneClick Hub',
+  tagline: 'Discover. Tap. Own — premium goods in one immersive click.',
   description:
-    'A curated house of design-led goods — timeless materials, intentional silhouettes, and pieces made to live beautifully every day.',
-  announcement: 'New arrivals and studio notes — explore the collection.',
+    'OneClick Hub is a design-led Shopify storefront with a cinematic 3D experience — curated products, instant checkout, and frictionless discovery.',
+  announcement: 'New drops and limited picks — explore the 3D collection.',
 } as const;
 
 type BrandEnv = {
   PUBLIC_BRAND_URL?: string;
   PUBLIC_STORE_DOMAIN?: string;
+  PUBLIC_BRAND_NAME?: string;
+  PUBLIC_BRAND_TAGLINE?: string;
+  PUBLIC_BRAND_DESCRIPTION?: string;
 };
+
+export type BrandConfig = {
+  name: string;
+  tagline: string;
+  description: string;
+  announcement: string;
+};
+
+/** Resolve display brand from optional PUBLIC_* overrides (server / loader). */
+export function resolveBrand(env?: BrandEnv): BrandConfig {
+  return {
+    name: env?.PUBLIC_BRAND_NAME?.trim() || BRAND.name,
+    tagline: env?.PUBLIC_BRAND_TAGLINE?.trim() || BRAND.tagline,
+    description: env?.PUBLIC_BRAND_DESCRIPTION?.trim() || BRAND.description,
+    announcement: BRAND.announcement,
+  };
+}
 
 /**
  * Canonical public site URL for SEO and JSON-LD.

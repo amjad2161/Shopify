@@ -115,6 +115,7 @@ export const en = {
 
   'product.addToCart': 'Add to cart',
   'product.description': 'Description',
+  'product.lowStock': 'Only {count} left in stock',
   'product.soldOut': 'Sold out',
   'product.unavailable': 'Unavailable',
 

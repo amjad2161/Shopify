@@ -17,7 +17,9 @@
     "build",
     "packages/**/dist/**/*",
     "scripts/automation/**/*",
-    "scripts/catalog/**/*"
+    "scripts/catalog/**/*",
+    "e2e/**/*",
+    "playwright.config.ts"
   ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],

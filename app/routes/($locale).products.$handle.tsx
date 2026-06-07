@@ -9,8 +9,12 @@ import {
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
 import {ProductPrice} from '~/components/ProductPrice';
-import {ProductImage} from '~/components/ProductImage';
+import {ProductViewer3d} from '~/components/product/ProductViewer3d';
 import {ProductForm} from '~/components/ProductForm';
+import {
+  isLowStock,
+  resolveProductModelUrl,
+} from '~/lib/three/map-products';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {
   findLocaleByPath,
@@ -112,13 +116,24 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml} = product;
+  const {title, descriptionHtml, totalInventory, handle} = product;
+  const modelUrl = resolveProductModelUrl(product);
 
   return (
     <div className="product">
-      <ProductImage image={selectedVariant?.image} />
+      <ProductViewer3d
+        modelUrl={modelUrl}
+        image={selectedVariant?.image}
+        title={title}
+        handle={handle}
+      />
       <div className="product-main">
         <h1>{title}</h1>
+        {isLowStock(totalInventory) ? (
+          <p className="product-low-stock" role="status">
+            {t('product.lowStock', {count: totalInventory ?? 0})}
+          </p>
+        ) : null}
         <ProductPrice
           price={selectedVariant?.price}
           compareAtPrice={selectedVariant?.compareAtPrice}
@@ -199,10 +214,30 @@ const PRODUCT_FRAGMENT = `#graphql
     title
     vendor
     handle
+    totalInventory
     descriptionHtml
     description
     encodedVariantExistence
     encodedVariantAvailability
+    media(first: 5) {
+      nodes {
+        __typename
+        ... on Model3d {
+          sources {
+            url
+            format
+            mimeType
+          }
+        }
+      }
+    }
+    model3dMetafield: metafield(namespace: "custom", key: "model_3d") {
+      reference {
+        ... on GenericFile {
+          url
+        }
+      }
+    }
     options {
       name
       optionValues {

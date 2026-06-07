@@ -115,6 +115,7 @@ export const he: Record<MessageKey, string> = {
 
   'product.addToCart': 'הוספה לעגלה',
   'product.description': 'תיאור',
+  'product.lowStock': 'נותרו רק {count} יחידות במלאי',
   'product.soldOut': 'אזל מהמלאי',
   'product.unavailable': 'לא זמין',
 

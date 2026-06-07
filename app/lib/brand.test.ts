@@ -1,10 +1,25 @@
 import {describe, expect, it} from 'vitest';
-import {organizationJsonLd, pageTitle, resolveBrandUrl} from '~/lib/brand';
+import {
+  BRAND,
+  organizationJsonLd,
+  pageTitle,
+  resolveBrand,
+  resolveBrandUrl,
+} from '~/lib/brand';
 
 describe('brand', () => {
   it('builds page titles', () => {
-    expect(pageTitle()).toContain('Lumen Atelier');
-    expect(pageTitle('Cart')).toBe('Cart | Lumen Atelier');
+    expect(pageTitle()).toContain(BRAND.name);
+    expect(pageTitle('Cart')).toBe(`Cart | ${BRAND.name}`);
+  });
+
+  it('overrides brand from PUBLIC_* env', () => {
+    expect(
+      resolveBrand({
+        PUBLIC_BRAND_NAME: 'Custom Store',
+        PUBLIC_BRAND_TAGLINE: 'Custom tagline',
+      }).name,
+    ).toBe('Custom Store');
   });
 
   it('prefers PUBLIC_BRAND_URL for canonical URL', () => {

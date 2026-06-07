@@ -1,5 +1,7 @@
-import {Await, Link} from 'react-router';
+import {Await, Link, useLocation, useRouteLoaderData} from 'react-router';
 import {Suspense, useId} from 'react';
+import type {RootLoader} from '~/root';
+import {isImmersiveHomePath} from '~/lib/experience';
 import type {
   CartApiQueryFragment,
   FooterQuery,
@@ -13,6 +15,9 @@ import {CartMain} from '~/components/CartMain';
 import {SearchFormPredictive} from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {useI18n} from '~/lib/i18n/I18nProvider';
+import {useAnnouncementOffset} from '~/hooks/useAnnouncementOffset';
+import {usePageTransition} from '~/hooks/usePageTransition';
+import {useWebVitals} from '~/hooks/useWebVitals';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -31,26 +36,42 @@ export function PageLayout({
   isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
+  const location = useLocation();
+  const root = useRouteLoaderData<RootLoader>('root');
+  const immersive3dEnabled = Boolean(root?.immersive3dEnabled);
+  const immersiveHome =
+    immersive3dEnabled && isImmersiveHomePath(location.pathname);
+
+  useAnnouncementOffset(immersiveHome);
+  usePageTransition(immersive3dEnabled);
+  useWebVitals(immersive3dEnabled, immersiveHome ? '3d' : 'classic');
+
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      <AnnouncementBar />
-      {header && (
-        <Header
-          header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
-          publicStoreDomain={publicStoreDomain}
-        />
-      )}
-      <main>{children}</main>
-      <Footer
-        footer={footer}
-        header={header}
-        publicStoreDomain={publicStoreDomain}
-      />
+      <div className={immersiveHome ? 'layout--immersive' : undefined}>
+        <CartAside cart={cart} />
+        <SearchAside />
+        <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
+        <AnnouncementBar />
+        {header && (
+          <Header
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+          />
+        )}
+        <main className={immersiveHome ? 'main--immersive' : undefined}>
+          {children}
+        </main>
+        {!immersiveHome ? (
+          <Footer
+            footer={footer}
+            header={header}
+            publicStoreDomain={publicStoreDomain}
+          />
+        ) : null}
+      </div>
     </Aside.Provider>
   );
 }
