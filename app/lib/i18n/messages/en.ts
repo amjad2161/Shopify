@@ -1,9 +1,9 @@
 export const en = {
-  'brand.tagline': 'Objects of light, craft, and quiet luxury.',
+  'brand.tagline': 'Discover. Tap. Own — premium goods in one immersive click.',
   'brand.description':
-    'A curated house of design-led goods — timeless materials, intentional silhouettes, and pieces made to live beautifully every day.',
+    'OneClick Hub is a design-led Shopify storefront with a cinematic 3D experience — curated products, instant checkout, and frictionless discovery.',
   'brand.announcement':
-    'New arrivals and studio notes — explore the collection.',
+    'New drops and limited picks — explore the 3D collection.',
 
   'nav.home': 'Home',
   'nav.search': 'Search',
@@ -30,10 +30,10 @@ export const en = {
     'Publish a collection in Shopify admin — set FEATURED_COLLECTION_HANDLE in .env to pin the homepage feature.',
   'home.featured.browseAll': 'Browse all products →',
   'home.featured.explore': 'Explore →',
-  'home.recommended.eyebrow': 'The atelier edit',
-  'home.recommended.title': 'Pieces we return to',
+  'home.recommended.eyebrow': 'Trending now',
+  'home.recommended.title': 'Picks worth a closer look',
   'home.recommended.sub':
-    'A tight selection of objects with enduring form — made to layer, live in, and last.',
+    'Best sellers and fresh drops across beauty, tech, home, and more — curated for quick discovery.',
   'home.recommended.loading': 'Curating…',
   'home.recommended.empty':
     'Products will appear here once your catalog is published in Shopify admin.',
@@ -50,7 +50,7 @@ export const en = {
   'newsletter.eyebrow': 'The inner circle',
   'newsletter.title': 'First access to new drops',
   'newsletter.body':
-    'Join {brand} for early releases, studio notes, and members-only offers — no noise, just craft.',
+    'Join {brand} for launch alerts, member-only deals, and curated drops — no spam, just the good stuff.',
   'newsletter.emailLabel': 'Email address',
   'newsletter.subscribe': 'Subscribe',
   'newsletter.subscribing': 'Subscribing…',

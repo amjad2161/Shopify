@@ -7,7 +7,7 @@ import type {
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {NewsletterStrip} from '~/components/NewsletterStrip';
-import {BRAND} from '~/lib/brand';
+import {useBrand} from '~/hooks/useBrand';
 import {useI18n} from '~/lib/i18n/I18nProvider';
 
 type ClassicHomepageProps = {
@@ -37,6 +37,7 @@ function Hero({
   featuredCollection: FeaturedCollectionFragment | null;
 }) {
   const {t, path} = useI18n();
+  const brand = useBrand();
   const collectionHandle = featuredCollection?.handle ?? 'all';
 
   return (
@@ -44,7 +45,7 @@ function Hero({
       <div className="hero-copy">
         <p className="hero-eyebrow">{t('home.hero.eyebrow')}</p>
         <h1 id="hero-heading" className="hero-title font-display">
-          {BRAND.name}
+          {brand.name}
         </h1>
         <p className="hero-lead">{t('brand.tagline')}</p>
         <p className="hero-body">{t('brand.description')}</p>

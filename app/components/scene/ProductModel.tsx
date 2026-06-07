@@ -2,7 +2,7 @@ import {Component, useEffect, useMemo, useRef, useState} from 'react';
 import type {ReactNode} from 'react';
 import {useFrame} from '@react-three/fiber';
 import {Center, Float, useCursor, useGLTF} from '@react-three/drei';
-import type {Group} from 'three';
+import {Vector3, type Group} from 'three';
 import {staticOrbTransform} from '~/lib/experience-scroll';
 import type {SceneProduct} from '~/lib/three/map-products';
 import {ensureDracoDecoder} from '~/lib/three/load-glb';
@@ -25,6 +25,7 @@ function ProductModelMesh({
   ensureDracoDecoder();
   const {scene} = useGLTF(product.modelUrl!);
   const groupRef = useRef<Group>(null);
+  const targetScale = useRef(new Vector3(1, 1, 1));
   const [hovered, setHovered] = useState(false);
   const activeIndex = useSceneStore((s) => s.activeIndex);
   const scrollProgress = useSceneStore((s) => s.scrollProgress);
@@ -53,7 +54,8 @@ function ProductModelMesh({
     groupRef.current.rotation.y =
       t * 0.12 + index * 0.35 + scrollProgress * Math.PI * 0.75;
     const scale = isActive || hovered ? 1.15 : 1;
-    groupRef.current.scale.lerp({x: scale, y: scale, z: scale} as never, 0.08);
+    targetScale.current.set(scale, scale, scale);
+    groupRef.current.scale.lerp(targetScale.current, 0.08);
   });
 
   return (

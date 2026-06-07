@@ -1,6 +1,6 @@
 import {existsSync, readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
-import {parseEnvFile, validateStoreEnvRecord} from '../app/lib/store-env';
+import {parseEnvFile, validateStoreEnvRecord} from '../shared/store-env-core.ts';
 
 const envPath = resolve(process.cwd(), '.env');
 

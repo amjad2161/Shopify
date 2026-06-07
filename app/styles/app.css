@@ -102,6 +102,15 @@ aside li {
   border-width: 0;
 }
 
+.newsletter-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .overlay {
   background: rgba(0, 0, 0, 0.2);
   bottom: 0;

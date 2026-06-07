@@ -8,7 +8,7 @@ import {
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {LocaleSwitcher} from '~/components/LocaleSwitcher';
-import {BRAND} from '~/lib/brand';
+import {useBrand} from '~/hooks/useBrand';
 import {stripLocalePrefix} from '~/lib/i18n/paths';
 import {useI18n} from '~/lib/i18n/I18nProvider';
 
@@ -45,12 +45,13 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {t, path} = useI18n();
+  const brand = useBrand();
   const {menu} = header;
   return (
     <header className="header">
       <NavLink prefetch="intent" to={path('/')} style={activeLinkStyle} end>
         <span className="header-brand">
-          <strong className="font-display">{BRAND.name}</strong>
+          <strong className="font-display">{brand.name}</strong>
           <span className="header-tagline">{t('brand.tagline')}</span>
         </span>
       </NavLink>

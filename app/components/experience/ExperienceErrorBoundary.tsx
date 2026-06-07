@@ -32,7 +32,9 @@ export class ExperienceErrorBoundary extends Component<
   }
 
   render() {
-    if (this.state.hasError) return null;
+    if (this.state.hasError) {
+      return <div className="experience-canvas-fallback" aria-hidden="true" />;
+    }
     return this.props.children;
   }
 }

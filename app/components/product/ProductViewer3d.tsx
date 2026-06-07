@@ -1,9 +1,11 @@
-import {lazy, Suspense, useEffect, useState} from 'react';
+import {lazy, Suspense, useEffect} from 'react';
+import {useRouteLoaderData} from 'react-router';
 import {useAnalytics} from '@shopify/hydrogen';
 import {ClientOnly} from '~/components/ClientOnly';
 import {ProductImage} from '~/components/ProductImage';
 import {publishExperienceEvent} from '~/lib/experience-analytics';
-import {detectWebGLSupport} from '~/lib/three/webgl';
+import {useWebGLSupport} from '~/hooks/useWebGLSupport';
+import type {RootLoader} from '~/root';
 import type {ProductVariantFragment} from 'storefrontapi.generated';
 
 const ProductViewerCanvas = lazy(() =>
@@ -27,22 +29,22 @@ export function ProductViewer3d({
   handle,
 }: ProductViewer3dProps) {
   const {publish} = useAnalytics();
-  const [webglOk, setWebglOk] = useState(true);
+  const {checked, supported} = useWebGLSupport();
+  const root = useRouteLoaderData<RootLoader>('root');
+  const immersive3dEnabled = Boolean(root?.immersive3dEnabled);
+  const canRender3d =
+    immersive3dEnabled && Boolean(modelUrl) && checked && supported;
 
   useEffect(() => {
-    setWebglOk(detectWebGLSupport());
-  }, []);
-
-  useEffect(() => {
-    if (modelUrl && webglOk) {
+    if (canRender3d) {
       publishExperienceEvent(publish, {
         event: '3d_pdp_viewer_open',
         handle,
       });
     }
-  }, [handle, modelUrl, publish, webglOk]);
+  }, [canRender3d, handle, publish]);
 
-  if (!modelUrl || !webglOk) {
+  if (!canRender3d || !modelUrl) {
     return <ProductImage image={image} />;
   }
 

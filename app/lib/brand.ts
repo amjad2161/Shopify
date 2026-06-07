@@ -52,18 +52,20 @@ export function resolveBrandUrl(env: BrandEnv) {
 }
 
 /** Page title for document head — e.g. "Collection | OneClick Hub" */
-export function pageTitle(page?: string) {
-  return page ? `${page} | ${BRAND.name}` : `${BRAND.name} — ${BRAND.tagline}`;
+export function pageTitle(page?: string, brand: BrandConfig = BRAND) {
+  return page
+    ? `${page} | ${brand.name}`
+    : `${brand.name} — ${brand.tagline}`;
 }
 
 /** JSON-LD Organization schema for SEO */
-export function organizationJsonLd(siteUrl?: string) {
+export function organizationJsonLd(siteUrl?: string, brand: BrandConfig = BRAND) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: BRAND.name,
-    description: BRAND.description,
+    name: brand.name,
+    description: brand.description,
     ...(siteUrl ? {url: siteUrl} : {}),
-    slogan: BRAND.tagline,
+    slogan: brand.tagline,
   };
 }

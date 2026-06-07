@@ -20,18 +20,20 @@ import {
   findLocaleByPath,
   getDefaultLocale,
   localizePath,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
 } from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data, params}) => {
+export const meta: Route.MetaFunction = ({data, params, matches}) => {
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page =
     data?.product.title ?? translate(locale.uiLocale, 'meta.product');
   const handle = data?.product.handle;
+  const brandName = brandNameFromMatches(matches);
   return [
-    {title: localizedPageTitle(page, locale.uiLocale)},
+    {title: localizedPageTitle(page, locale.uiLocale, brandName)},
     ...(handle
       ? [
           {

@@ -4,6 +4,7 @@ import {
   findLocaleByPath,
   getDefaultLocale,
   localizePath,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
@@ -15,14 +16,15 @@ import type {
 } from 'customer-accountapi.generated';
 import {CUSTOMER_ORDER_QUERY} from '~/graphql/customer-account/CustomerOrderQuery';
 
-export const meta: Route.MetaFunction = ({data, params}) => {
+export const meta: Route.MetaFunction = ({data, params, matches}) => {
+  const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = data?.order?.name
     ? translate(locale.uiLocale, 'account.orderMetaTitle', {
         name: data.order.name,
       })
     : translate(locale.uiLocale, 'account.ordersMetaTitle');
-  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
 };
 
 export async function loader({params, context}: Route.LoaderArgs) {

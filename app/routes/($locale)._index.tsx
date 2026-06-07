@@ -4,18 +4,19 @@ import {Suspense} from 'react';
 import type {RecommendedProductsQuery} from 'storefrontapi.generated';
 import {ClassicHomepage} from '~/components/home/ClassicHomepage';
 import {ImmersiveHome} from '~/components/experience/ImmersiveHome';
-import {organizationJsonLd, resolveBrandUrl} from '~/lib/brand';
+import {organizationJsonLd, resolveBrand, resolveBrandUrl} from '~/lib/brand';
 import {isImmersive3dEnabled} from '~/lib/experience';
 import type {StoreEnvRecord} from '~/lib/store-env';
 import {
   findLocaleByPath,
   getDefaultLocale,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
 } from '~/lib/i18n';
 
-const DEFAULT_FEATURED_COLLECTION_HANDLE = 'frontpage';
+const DEFAULT_FEATURED_COLLECTION_HANDLE = 'trending-now';
 
 function getFeaturedCollectionHandle(env: Env) {
   const record = env as unknown as StoreEnvRecord;
@@ -27,9 +28,10 @@ function getFeaturedCollectionHandle(env: Env) {
   return record.FEATURED_COLLECTION_HANDLE?.trim();
 }
 
-export const meta: Route.MetaFunction = ({data, params}) => {
+export const meta: Route.MetaFunction = ({data, params, matches}) => {
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
-  const title = localizedPageTitle(undefined, locale.uiLocale);
+  const brandName = data?.brand?.name ?? brandNameFromMatches(matches);
+  const title = localizedPageTitle(undefined, locale.uiLocale, brandName);
   const description = translate(locale.uiLocale, 'brand.description');
   const image = data?.featuredCollection?.image?.url;
   const brandUrl = data?.brandUrl;
@@ -62,6 +64,7 @@ export async function loader(args: Route.LoaderArgs) {
   return {
     ...deferredData,
     ...criticalData,
+    brand: resolveBrand(args.context.env),
     brandUrl: resolveBrandUrl(args.context.env),
     immersive3d: isImmersive3dEnabled(
       args.context.env as unknown as StoreEnvRecord,
@@ -141,7 +144,9 @@ export default function Homepage() {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(organizationJsonLd(data.brandUrl)),
+            __html: JSON.stringify(
+              organizationJsonLd(data.brandUrl, data.brand),
+            ),
           }}
         />
       </>
@@ -157,7 +162,7 @@ export default function Homepage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(organizationJsonLd(data.brandUrl)),
+          __html: JSON.stringify(organizationJsonLd(data.brandUrl, data.brand)),
         }}
       />
     </>

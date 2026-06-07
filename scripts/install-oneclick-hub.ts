@@ -14,7 +14,7 @@ import {
   isPlaceholder,
   parseEnvFile,
   validateStoreEnvRecord,
-} from '../app/lib/store-env';
+} from '../shared/store-env-core.ts';
 import {npmCommand, runCommand, runNpm} from './lib/spawn-npm';
 
 type InstallOptions = {

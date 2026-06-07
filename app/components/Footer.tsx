@@ -1,7 +1,7 @@
 import {Suspense} from 'react';
 import {Await, NavLink} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
-import {BRAND} from '~/lib/brand';
+import {useBrand} from '~/hooks/useBrand';
 import {stripLocalePrefix} from '~/lib/i18n/paths';
 import {useI18n} from '~/lib/i18n/I18nProvider';
 
@@ -17,6 +17,7 @@ export function Footer({
   publicStoreDomain,
 }: FooterProps) {
   const {t, path} = useI18n();
+  const brand = useBrand();
 
   return (
     <Suspense>
@@ -24,7 +25,7 @@ export function Footer({
         {(footer) => (
           <footer className="footer">
             <div className="footer-brand">
-              <p className="font-display footer-brand-name">{BRAND.name}</p>
+              <p className="font-display footer-brand-name">{brand.name}</p>
               <p className="footer-brand-tagline">{t('brand.tagline')}</p>
             </div>
             {footer?.menu && header.shop.primaryDomain?.url && (
@@ -38,7 +39,7 @@ export function Footer({
             <p className="footer-note">
               {t('footer.note', {
                 year: new Date().getFullYear(),
-                brand: BRAND.name,
+                brand: brand.name,
               })}
             </p>
           </footer>

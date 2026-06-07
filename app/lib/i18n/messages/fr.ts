@@ -1,11 +1,11 @@
 import type {MessageKey} from './en';
 
 export const fr: Record<MessageKey, string> = {
-  'brand.tagline': 'Objets de lumière, d’artisanat et de luxe discret.',
+  'brand.tagline': 'Découvrir. Toucher. Posséder — des produits premium en un clic immersif.',
   'brand.description':
-    'Une maison éditoriale de pièces au design affirmé — matières intemporelles, silhouettes intentionnelles et objets faits pour accompagner le quotidien avec élégance.',
+    'OneClick Hub est une vitrine Shopify design avec une expérience 3D cinématique — produits sélectionnés, paiement instantané et découverte sans friction.',
   'brand.announcement':
-    'Nouveautés et notes d’atelier — explorez la collection.',
+    'Nouveautés et sélections limitées — explorez la collection 3D.',
 
   'nav.home': 'Accueil',
   'nav.search': 'Rechercher',
@@ -32,10 +32,10 @@ export const fr: Record<MessageKey, string> = {
     'Publiez une collection dans l’admin Shopify — définissez FEATURED_COLLECTION_HANDLE dans .env pour mettre en avant la page d’accueil.',
   'home.featured.browseAll': 'Voir tous les produits →',
   'home.featured.explore': 'Explorer →',
-  'home.recommended.eyebrow': 'L’édition atelier',
-  'home.recommended.title': 'Les pièces auxquelles nous revenons',
+  'home.recommended.eyebrow': 'Tendances du moment',
+  'home.recommended.title': 'Sélections à découvrir',
   'home.recommended.sub':
-    'Une sélection resserrée d’objets à la forme durable — à superposer, à vivre et à conserver.',
+    'Meilleures ventes et nouveautés beauté, tech, maison et plus — sélectionnées pour une découverte rapide.',
   'home.recommended.loading': 'Sélection en cours…',
   'home.recommended.empty':
     'Les produits s’afficheront ici une fois votre catalogue publié dans l’admin Shopify.',
@@ -52,7 +52,7 @@ export const fr: Record<MessageKey, string> = {
   'newsletter.eyebrow': 'Le cercle privé',
   'newsletter.title': 'Accès anticipé aux nouveautés',
   'newsletter.body':
-    'Rejoignez {brand} pour les lancements en avant-première, les notes d’atelier et les offres réservées aux membres — sans bruit, juste l’artisanat.',
+    'Rejoignez {brand} pour les alertes de lancement, les offres membres et les sélections exclusives — sans spam, que l’essentiel.',
   'newsletter.emailLabel': 'Adresse courriel',
   'newsletter.subscribe': 'S’abonner',
   'newsletter.subscribing': 'Inscription…',

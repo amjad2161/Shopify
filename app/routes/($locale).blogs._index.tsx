@@ -6,6 +6,7 @@ import type {BlogsQuery} from 'storefrontapi.generated';
 import {
   findLocaleByPath,
   getDefaultLocale,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
@@ -13,10 +14,11 @@ import {
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0];
 
-export const meta: Route.MetaFunction = ({params}) => {
+export const meta: Route.MetaFunction = ({params, matches}) => {
+  const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = translate(locale.uiLocale, 'blogs.heading');
-  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {

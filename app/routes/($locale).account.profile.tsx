@@ -12,6 +12,7 @@ import type {Route} from './+types/($locale).account.profile';
 import {
   findLocaleByPath,
   getDefaultLocale,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
@@ -22,10 +23,11 @@ export type ActionResponse = {
   customer: CustomerFragment | null;
 };
 
-export const meta: Route.MetaFunction = ({params}) => {
+export const meta: Route.MetaFunction = ({params, matches}) => {
+  const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = translate(locale.uiLocale, 'account.profile');
-  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
 };
 
 export async function loader({context}: Route.LoaderArgs) {

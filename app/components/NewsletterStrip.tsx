@@ -1,6 +1,6 @@
 import {useEffect, useRef} from 'react';
 import {useFetcher} from 'react-router';
-import {BRAND} from '~/lib/brand';
+import {useBrand} from '~/hooks/useBrand';
 import {useI18n} from '~/lib/i18n/I18nProvider';
 
 type NewsletterActionData = {
@@ -11,6 +11,7 @@ type NewsletterActionData = {
 
 export function NewsletterStrip() {
   const {t, path} = useI18n();
+  const brand = useBrand();
   const fetcher = useFetcher<NewsletterActionData>();
   const formRef = useRef<HTMLFormElement>(null);
   const isSubmitting = fetcher.state !== 'idle';
@@ -30,7 +31,7 @@ export function NewsletterStrip() {
           <h2 id="newsletter-heading" className="font-display">
             {t('newsletter.title')}
           </h2>
-          <p>{t('newsletter.body', {brand: BRAND.name})}</p>
+          <p>{t('newsletter.body', {brand: brand.name})}</p>
         </div>
         <fetcher.Form
           ref={formRef}
@@ -38,6 +39,14 @@ export function NewsletterStrip() {
           method="post"
           action={path('/newsletter')}
         >
+          <input
+            type="text"
+            name="company"
+            tabIndex={-1}
+            autoComplete="off"
+            className="newsletter-honeypot"
+            aria-hidden="true"
+          />
           <label className="sr-only" htmlFor="newsletter-email">
             {t('newsletter.emailLabel')}
           </label>

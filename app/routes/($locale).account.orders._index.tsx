@@ -26,6 +26,7 @@ import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {
   findLocaleByPath,
   getDefaultLocale,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
@@ -36,10 +37,11 @@ type OrdersLoaderData = {
   filters: OrderFilterParams;
 };
 
-export const meta: Route.MetaFunction = ({params}) => {
+export const meta: Route.MetaFunction = ({params, matches}) => {
+  const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = translate(locale.uiLocale, 'account.ordersMetaTitle');
-  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {

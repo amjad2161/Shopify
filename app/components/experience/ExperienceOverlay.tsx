@@ -1,7 +1,7 @@
 import {Link} from 'react-router';
 import type {SceneProduct} from '~/lib/three/map-products';
 import {isLowStock} from '~/lib/three/map-products';
-import {BRAND} from '~/lib/brand';
+import {useBrand} from '~/hooks/useBrand';
 import {useSceneStore} from '~/stores/useSceneStore';
 import {useI18n} from '~/lib/i18n/I18nProvider';
 import {ExperienceProductRail} from '~/components/experience/ExperienceProductRail';
@@ -19,6 +19,7 @@ export function ExperienceOverlay({
   onFocusIndex,
 }: ExperienceOverlayProps) {
   const {t, path} = useI18n();
+  const brand = useBrand();
   const activeIndex = useSceneStore((s) => s.activeIndex);
   const focus = products[activeIndex] ?? products[0];
   const focusPanelRef = useExperienceFocusAnimation(activeIndex);
@@ -27,7 +28,7 @@ export function ExperienceOverlay({
     <div className="experience-overlay">
       <header className="experience-header">
         <p className="experience-eyebrow">{t('home.hero.eyebrow')}</p>
-        <h1 className="experience-title font-display">{BRAND.name}</h1>
+        <h1 className="experience-title font-display">{brand.name}</h1>
         <p className="experience-tagline">{t('brand.tagline')}</p>
       </header>
 

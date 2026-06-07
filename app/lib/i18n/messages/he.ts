@@ -1,10 +1,10 @@
 import type {MessageKey} from './en';
 
 export const he: Record<MessageKey, string> = {
-  'brand.tagline': 'חפצים של אור, מלאכה ויוקרה שקטה.',
+  'brand.tagline': 'לגלות. ללחוץ. לקנות — מוצרים פרימיום בלחיצה אחת חווייתית.',
   'brand.description':
-    'בית ערוך לטובין מעוצבים — חומרים נצחיים, קווים מכוונים ופריטים שנועדו לחיות יפה בכל יום.',
-  'brand.announcement': 'הגעות חדשות ופתקי סטודיו — גלו את הקולקציה.',
+    'OneClick Hub הוא חנות Shopify מעוצבת עם חוויית 3D קולנועית — מוצרים נבחרים, תשלום מיידי וגילוי חסר חיכוכים.',
+  'brand.announcement': 'השקות חדשות ומבחר מוגבל — גלו את הקולקציה התלת־ממדית.',
 
   'nav.home': 'בית',
   'nav.search': 'חיפוש',
@@ -31,10 +31,10 @@ export const he: Record<MessageKey, string> = {
     'פרסמו קולקציה בניהול Shopify — הגדירו FEATURED_COLLECTION_HANDLE בקובץ .env כדי לקבוע את הקולקציה בדף הבית.',
   'home.featured.browseAll': 'לכל המוצרים →',
   'home.featured.explore': 'לגלות →',
-  'home.recommended.eyebrow': 'עריכת האטלייה',
-  'home.recommended.title': 'פריטים שאליהם חוזרים',
+  'home.recommended.eyebrow': 'טרנדים עכשיו',
+  'home.recommended.title': 'בחירות ששווה להתקרב אליהן',
   'home.recommended.sub':
-    'מבחר מצומצם של חפצים בצורה נצחית — לשכבות, לחיים ולשנים.',
+    'רבי מכר והשקות חדשות ביופי, טכנולוגיה, בית ועוד — נבחרו לגילוי מהיר.',
   'home.recommended.loading': 'אוצרים…',
   'home.recommended.empty':
     'המוצרים יופיעו כאן לאחר פרסום הקטלוג בניהול Shopify.',
@@ -51,7 +51,7 @@ export const he: Record<MessageKey, string> = {
   'newsletter.eyebrow': 'המעגל הפנימי',
   'newsletter.title': 'גישה ראשונה להשקות',
   'newsletter.body':
-    'הצטרפו ל-{brand} להשקות מוקדמות, הערות סטודיו והטבות לחברים — בלי רעש, רק מלאכה.',
+    'הצטרפו ל-{brand} להתראות השקה, מבצעים לחברים ומבחרים בלעדיים — בלי ספאם, רק מה ששווה.',
   'newsletter.emailLabel': 'כתובת דוא״ל',
   'newsletter.subscribe': 'הרשמה',
   'newsletter.subscribing': 'נרשמים…',

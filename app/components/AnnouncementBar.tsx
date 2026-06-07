@@ -1,5 +1,4 @@
 import {Link} from 'react-router';
-import {BRAND} from '~/lib/brand';
 import {useI18n} from '~/lib/i18n/I18nProvider';
 
 export function AnnouncementBar() {

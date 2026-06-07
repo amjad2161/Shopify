@@ -20,7 +20,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import {isImmersive3dEnabled} from '~/lib/experience';
 import type {StoreEnvRecord} from '~/lib/store-env';
 import {PageLayout} from './components/PageLayout';
-import {BRAND, resolveBrandUrl} from '~/lib/brand';
+import {BRAND, resolveBrand, resolveBrandUrl} from '~/lib/brand';
 import {I18nProvider} from '~/lib/i18n/I18nProvider';
 import {resolveLocaleFromRequest, translate} from '~/lib/i18n';
 
@@ -100,6 +100,7 @@ export async function loader(args: Route.LoaderArgs) {
     ...deferredData,
     ...criticalData,
     locale,
+    brand: resolveBrand(env),
     brandUrl: resolveBrandUrl(env),
     immersive3dEnabled: isImmersive3dEnabled(env as unknown as StoreEnvRecord),
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
@@ -172,9 +173,10 @@ export function Layout({children}: {children?: React.ReactNode}) {
   const locale = data?.locale;
   const htmlLang = locale?.intlTag ?? 'en-US';
   const htmlDir = locale?.dir ?? 'ltr';
+  const brand = data?.brand ?? BRAND;
   const metaDescription = locale
     ? translate(locale.uiLocale, 'brand.description')
-    : BRAND.description;
+    : brand.description;
 
   return (
     <html lang={htmlLang} dir={htmlDir}>
@@ -223,6 +225,7 @@ export default function App() {
 export function ErrorBoundary() {
   const error = useRouteError();
   const data = useRouteLoaderData<RootLoader>('root');
+  const brand = data?.brand ?? BRAND;
   const locale = data?.locale;
   const uiLocale = locale?.uiLocale ?? 'en';
   const showDetails = import.meta.env.DEV;
@@ -239,7 +242,7 @@ export function ErrorBoundary() {
   return (
     <div className="route-error mx-auto max-w-lg px-6 py-24 text-center">
       <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-accent)]">
-        {BRAND.name}
+        {brand.name}
       </p>
       <h1 className="font-display mt-4 text-4xl">
         {translate(uiLocale, 'error.title')}

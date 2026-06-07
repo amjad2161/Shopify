@@ -4,15 +4,17 @@ import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
 import {
   findLocaleByPath,
   getDefaultLocale,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
 } from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({params}) => {
+export const meta: Route.MetaFunction = ({params, matches}) => {
+  const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = translate(locale.uiLocale, 'policies.heading');
-  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
 };
 
 export async function loader({context}: Route.LoaderArgs) {

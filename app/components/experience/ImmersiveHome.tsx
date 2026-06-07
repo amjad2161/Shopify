@@ -64,6 +64,14 @@ export function ImmersiveHome({
   }, [checked, publish, supported]);
 
   useEffect(() => {
+    if (!checked || !supported || runtimeFallback || hasProducts) return;
+    publishExperienceEvent(publish, {
+      event: '3d_fallback',
+      reason: 'no_products',
+    });
+  }, [checked, hasProducts, publish, runtimeFallback, supported]);
+
+  useEffect(() => {
     for (const product of sceneProductsWithModels(sceneProducts)) {
       if (product.modelUrl) preloadGlb(product.modelUrl);
     }
@@ -94,7 +102,12 @@ export function ImmersiveHome({
     [publish],
   );
 
-  if ((checked && !supported) || runtimeFallback || !hasProducts) {
+  if (
+    !checked ||
+    !supported ||
+    runtimeFallback ||
+    !hasProducts
+  ) {
     return (
       <ClassicHomepage
         featuredCollection={featuredCollection}

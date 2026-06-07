@@ -26,7 +26,7 @@ function generateNewsletterPassword() {
   const bytes = new Uint8Array(24);
   crypto.getRandomValues(bytes);
   const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
-  return `La-${token}`;
+  return `Och-${token}`;
 }
 
 export async function loader() {
@@ -42,6 +42,14 @@ export async function action({request, context}: Route.ActionArgs) {
   }
 
   const formData = await request.formData();
+  const honeypot = String(formData.get('company') ?? '').trim();
+  if (honeypot) {
+    return data({
+      ok: true as const,
+      message: translate(uiLocale, 'newsletter.success'),
+    });
+  }
+
   const email = String(formData.get('email') ?? '')
     .trim()
     .toLowerCase();

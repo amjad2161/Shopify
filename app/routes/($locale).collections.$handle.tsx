@@ -10,16 +10,18 @@ import {
   findLocaleByPath,
   getDefaultLocale,
   localizePath,
+  brandNameFromMatches,
   localizedPageTitle,
   translate,
 } from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data, params}) => {
+export const meta: Route.MetaFunction = ({data, params, matches}) => {
+  const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page =
     data?.collection.title ??
     translate(locale.uiLocale, 'meta.collection');
-  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
