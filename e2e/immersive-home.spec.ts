@@ -30,4 +30,31 @@ test.describe('Immersive homepage', () => {
     await page.goto('/collections/all');
     await expect(page.locator('main')).toBeVisible({timeout: 30_000});
   });
+
+  test('immersive overlay exposes product focus affordance', async ({page}) => {
+    await page.goto('/');
+
+    const immersive = page.locator('.experience-shell');
+    if ((await immersive.count()) === 0) {
+      await expect(page.locator('.home')).toBeVisible({timeout: 30_000});
+      return;
+    }
+
+    await expect(page.locator('.experience-overlay')).toBeVisible();
+    await expect(page.locator('.experience-title, .experience-cta')).toBeVisible();
+  });
+
+  test('product pages render the PDP media region', async ({page}) => {
+    await page.goto('/collections/all');
+    await expect(page.locator('main')).toBeVisible({timeout: 30_000});
+
+    const productLink = page.locator('a[href*="/products/"]').first();
+    if ((await productLink.count()) === 0) return;
+
+    await productLink.click();
+    await expect(page.locator('.product')).toBeVisible({timeout: 30_000});
+    await expect(
+      page.locator('.product-viewer-3d, .product img, .product-image'),
+    ).toBeVisible();
+  });
 });

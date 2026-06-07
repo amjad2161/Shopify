@@ -3,6 +3,7 @@ import type {ReactNode} from 'react';
 import {useFrame} from '@react-three/fiber';
 import {Center, Float, useGLTF} from '@react-three/drei';
 import type {Group} from 'three';
+import {staticOrbTransform} from '~/lib/experience-scroll';
 import type {SceneProduct} from '~/lib/three/map-products';
 import {ensureDracoDecoder} from '~/lib/three/load-glb';
 import {useSceneStore} from '~/stores/useSceneStore';
@@ -31,7 +32,20 @@ function ProductModelMesh({
   const cloned = useMemo(() => scene.clone(true), [scene]);
 
   useFrame((state) => {
-    if (!groupRef.current || reducedMotion) return;
+    if (!groupRef.current) return;
+
+    if (reducedMotion) {
+      const {rotationY, scale} = staticOrbTransform(
+        index,
+        scrollProgress,
+        isActive,
+        hovered,
+      );
+      groupRef.current.rotation.y = rotationY * 0.75;
+      groupRef.current.scale.set(scale, scale, scale);
+      return;
+    }
+
     const t = state.clock.elapsedTime;
     groupRef.current.rotation.y =
       t * 0.12 + index * 0.35 + scrollProgress * Math.PI * 0.75;

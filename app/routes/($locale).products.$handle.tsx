@@ -116,7 +116,7 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
-  const {title, descriptionHtml, totalInventory} = product;
+  const {title, descriptionHtml, totalInventory, handle} = product;
   const modelUrl = resolveProductModelUrl(product);
 
   return (
@@ -125,6 +125,7 @@ export default function Product() {
         modelUrl={modelUrl}
         image={selectedVariant?.image}
         title={title}
+        handle={handle}
       />
       <div className="product-main">
         <h1>{title}</h1>

@@ -16,10 +16,16 @@ type ProductViewer3dProps = {
   modelUrl?: string;
   image?: ProductVariantFragment['image'];
   title: string;
+  handle: string;
 };
 
 /** PDP 3D viewer with image fallback when WebGL or GLB is unavailable. */
-export function ProductViewer3d({modelUrl, image, title}: ProductViewer3dProps) {
+export function ProductViewer3d({
+  modelUrl,
+  image,
+  title,
+  handle,
+}: ProductViewer3dProps) {
   const {publish} = useAnalytics();
   const [webglOk, setWebglOk] = useState(true);
 
@@ -31,10 +37,10 @@ export function ProductViewer3d({modelUrl, image, title}: ProductViewer3dProps) 
     if (modelUrl && webglOk) {
       publishExperienceEvent(publish, {
         event: '3d_pdp_viewer_open',
-        handle: title,
+        handle,
       });
     }
-  }, [modelUrl, publish, title, webglOk]);
+  }, [handle, modelUrl, publish, webglOk]);
 
   if (!modelUrl || !webglOk) {
     return <ProductImage image={image} />;

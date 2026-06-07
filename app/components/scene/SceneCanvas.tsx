@@ -60,6 +60,7 @@ function SceneContent({
 
 export function SceneCanvas({products, onProductSelect}: SceneCanvasProps) {
   const dpr = useCanvasDpr();
+  const isMobile = useSceneStore((s) => s.isMobile);
 
   useEffect(() => {
     for (const product of sceneProductsWithModels(products)) {
@@ -71,7 +72,7 @@ export function SceneCanvas({products, onProductSelect}: SceneCanvasProps) {
     <Canvas
       className="experience-canvas"
       dpr={dpr}
-      shadows
+      shadows={!isMobile}
       camera={{position: [0, 0.4, 7.5], fov: 42, near: 0.1, far: 40}}
       gl={{
         antialias: true,

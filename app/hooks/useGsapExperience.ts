@@ -1,19 +1,21 @@
-import {useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import gsap from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
 import {useGSAP} from '@gsap/react';
+import {
+  scrollProgressFromElement,
+  syncScrollToScene,
+  type ScrollProduct,
+} from '~/lib/experience-scroll';
 import {useSceneStore} from '~/stores/useSceneStore';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-type ScrollProduct = {
-  id: string;
-  handle: string;
-  title: string;
-};
+export type {ScrollProduct};
 
 /**
  * Syncs scroll position with the global scene store for 3D choreography.
+ * Uses GSAP ScrollTrigger by default; falls back to native scroll when motion is reduced.
  */
 export function useGsapExperience(products: ScrollProduct[]) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -27,31 +29,48 @@ export function useGsapExperience(products: ScrollProduct[]) {
     () => {
       if (!rootRef.current || reducedMotion || productCount === 0) return;
 
+      const setters = {setScrollProgress, setActiveIndex, setFocus};
+
       ScrollTrigger.create({
         trigger: rootRef.current,
         start: 'top top',
         end: 'bottom bottom',
         scrub: 0.45,
         onUpdate: (self) => {
-          setScrollProgress(self.progress);
-          const index = Math.min(
-            productCount - 1,
-            Math.floor(self.progress * productCount),
-          );
-          setActiveIndex(index);
-          const product = products[index];
-          if (product) {
-            setFocus({
-              id: product.id,
-              handle: product.handle,
-              title: product.title,
-            });
-          }
+          syncScrollToScene(self.progress, products, setters);
         },
       });
     },
     {scope: rootRef, dependencies: [productCount, products, reducedMotion]},
   );
+
+  useEffect(() => {
+    if (!reducedMotion || productCount === 0) return;
+
+    const setters = {setScrollProgress, setActiveIndex, setFocus};
+
+    const tick = () => {
+      const root = rootRef.current;
+      if (!root) return;
+      syncScrollToScene(scrollProgressFromElement(root), products, setters);
+    };
+
+    tick();
+    window.addEventListener('scroll', tick, {passive: true});
+    window.addEventListener('resize', tick);
+
+    return () => {
+      window.removeEventListener('scroll', tick);
+      window.removeEventListener('resize', tick);
+    };
+  }, [
+    productCount,
+    products,
+    reducedMotion,
+    setActiveIndex,
+    setFocus,
+    setScrollProgress,
+  ]);
 
   return rootRef;
 }

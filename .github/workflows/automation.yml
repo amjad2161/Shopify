@@ -77,3 +77,44 @@ jobs:
           PUBLIC_BRAND_NAME=OneClick Hub
           EOF
           npm run build
+
+  store-e2e:
+    name: Playwright E2E (live store)
+    runs-on: ubuntu-latest
+    needs: automate
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run immersive E2E
+        env:
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          PUBLIC_STORE_DOMAIN: ${{ secrets.PUBLIC_STORE_DOMAIN }}
+          PUBLIC_STOREFRONT_API_TOKEN: ${{ secrets.PUBLIC_STOREFRONT_API_TOKEN }}
+        run: |
+          if [ -z "${SESSION_SECRET}" ] || [ -z "${PUBLIC_STORE_DOMAIN}" ] || [ -z "${PUBLIC_STOREFRONT_API_TOKEN}" ]; then
+            echo "Store secrets not configured — skipping Playwright E2E."
+            exit 0
+          fi
+          cat > .env <<EOF
+          SESSION_SECRET=${SESSION_SECRET}
+          PUBLIC_STORE_DOMAIN=${PUBLIC_STORE_DOMAIN}
+          PUBLIC_STOREFRONT_API_TOKEN=${PUBLIC_STOREFRONT_API_TOKEN}
+          PUBLIC_3D_EXPERIENCE=1
+          PUBLIC_BRAND_NAME=OneClick Hub
+          EOF
+          npm run test:e2e

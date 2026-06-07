@@ -2,6 +2,7 @@ import {useRef, useState} from 'react';
 import {useFrame} from '@react-three/fiber';
 import {Float, RoundedBox, useTexture} from '@react-three/drei';
 import type {Group, Mesh, Texture} from 'three';
+import {staticOrbTransform} from '~/lib/experience-scroll';
 import type {SceneProduct} from '~/lib/three/map-products';
 import {useSceneStore} from '~/stores/useSceneStore';
 
@@ -22,10 +23,25 @@ function ProductOrbCore({product, index, onSelect, map}: ProductOrbCoreProps) {
   const activeIndex = useSceneStore((s) => s.activeIndex);
   const scrollProgress = useSceneStore((s) => s.scrollProgress);
   const reducedMotion = useSceneStore((s) => s.reducedMotion);
+  const isMobile = useSceneStore((s) => s.isMobile);
   const isActive = activeIndex === index;
+  const enableShadows = !isMobile;
 
   useFrame((state) => {
-    if (!groupRef.current || reducedMotion) return;
+    if (!groupRef.current) return;
+
+    if (reducedMotion) {
+      const {rotationY, scale} = staticOrbTransform(
+        index,
+        scrollProgress,
+        isActive,
+        hovered,
+      );
+      groupRef.current.rotation.y = rotationY;
+      groupRef.current.scale.set(scale, scale, scale);
+      return;
+    }
+
     const t = state.clock.elapsedTime;
     groupRef.current.rotation.y =
       t * 0.15 + index * 0.4 + scrollProgress * Math.PI;
@@ -66,8 +82,8 @@ function ProductOrbCore({product, index, onSelect, map}: ProductOrbCoreProps) {
           args={[1.1, 1.1, 1.1]}
           radius={0.28}
           smoothness={6}
-          castShadow
-          receiveShadow
+          castShadow={enableShadows}
+          receiveShadow={enableShadows}
         >
           <meshStandardMaterial
             color={color}

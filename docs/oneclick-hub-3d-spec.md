@@ -84,7 +84,7 @@ e2e/immersive-home.spec.ts
 1. גלילה מזיזה את המצלמה/סיבוב האורבים (דרך `scrollProgress` + `setFocus`)
 2. לחיצה על אורב/מודל → אנליטיקה `3d_orb_click` + ניווט ל-PDP
 3. פאנל מוצר פעיל עם i18n (en/he/fr) + תווית מלאי נמוך אמיתית
-4. `prefers-reduced-motion` מכבה אנימציות GSAP ו-Float
+4. `prefers-reduced-motion` מכבה אנימציות GSAP/Float אך שומר סנכרון גלילה (native scroll → `syncScrollToScene`) ומיקום מצלמה סטטי
 5. announcement bar נעלם בעדינות אחרי תחילת גלילה (immersive בלבד)
 6. PDP: `ProductViewer3d` עם OrbitControls כשיש GLB + WebGL
 
@@ -96,7 +96,7 @@ e2e/immersive-home.spec.ts
 | ClientOnly (ללא WebGL ב-SSR) | ✅ |
 | DPR מוגבל בנייד | ✅ |
 | מקסימום 8 אורבים | ✅ |
-| צללים כבדים off בנייד | ✅ |
+| צללים כבדים off בנייד (`Canvas shadows`, `ProductOrb`, `StudioStage`) | ✅ |
 | Draco decoder (Google CDN) | ✅ |
 | WebP pipeline לטקסטורות | ✅ |
 | `three` ב-Vite SSR optimizeDeps | ✅ |
@@ -153,7 +153,7 @@ model3dMetafield: metafield(namespace: "custom", key: "model_3d") {
 - `PUBLIC_STORE_DOMAIN`
 - `PUBLIC_STOREFRONT_API_TOKEN`
 
-ה-workflow `store-build` מריץ `npm run build` אחרי ה-pipeline האוטומטי. ללא secrets — השלב מדולג.
+ה-workflow `store-build` מריץ `npm run build` אחרי ה-pipeline האוטומטי. `store-e2e` מריץ Playwright (`npm run test:e2e`) עם אותם secrets. ללא secrets — השלבים מדולגים.
 
 ## המשך פיתוח אופציונלי
 
