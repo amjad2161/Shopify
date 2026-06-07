@@ -14,9 +14,12 @@ import {
   isDryRun,
   readCatalogEnv,
 } from './lib/parse-env.ts';
+import {hasAiCredentials, isAiEnabled} from './ai/provider.ts';
+import {COMMERCE_MODES} from './config/commerce-modes.ts';
 import {ensureCatalogCollections} from './pipelines/ensure-collections.ts';
-import {importSupplierProducts} from './pipelines/import-products.ts';
+import {runSmartImport} from './pipelines/smart-import.ts';
 import {getConfiguredAdapters} from './suppliers/registry.ts';
+import {isCheapestSourceOnly} from './sourcing/cheapest-source.ts';
 import type {CatalogEnv, SupplierPlatformId, SyncReport} from './types.ts';
 
 export type CatalogSyncOptions = {
@@ -34,11 +37,18 @@ export type CatalogPlan = {
   adminReady: boolean;
   dryRunDefault: boolean;
   verticalCount: number;
+  commerceModeCount: number;
   collectionHandles: string[];
   ageRestrictedHandles: string[];
   configuredSuppliers: SupplierPlatformId[];
   pendingSuppliers: SupplierPlatformId[];
   featuredCollectionsHint: string[];
+  smartImport: {
+    aiEnabled: boolean;
+    aiCredentials: boolean;
+    cheapestSourceOnly: boolean;
+    targetRegion: string;
+  };
 };
 
 export function buildCatalogPlan(env: CatalogEnv): CatalogPlan {
@@ -53,16 +63,28 @@ export function buildCatalogPlan(env: CatalogEnv): CatalogPlan {
     ? featuredRaw.split(',').map((h) => h.trim()).filter(Boolean)
     : ['trending-now', 'beauty-grooming', 'technology'];
 
+  const region =
+    env.CATALOG_TARGET_COUNTRY?.trim() ||
+    env.CATALOG_TARGET_REGION?.trim() ||
+    'global';
+
   return {
     syncEnabled: isCatalogSyncEnabled(env),
     adminReady: hasAdminCredentials(env),
     dryRunDefault: isDryRun(env),
     verticalCount: CATALOG_VERTICALS.length,
+    commerceModeCount: COMMERCE_MODES.length,
     collectionHandles: allCollectionHandles(),
     ageRestrictedHandles: getAgeRestrictedVerticals().map((v) => v.handle),
     configuredSuppliers: configuredIds,
     pendingSuppliers: allPlatforms.filter((id) => !configuredIds.includes(id)),
     featuredCollectionsHint,
+    smartImport: {
+      aiEnabled: isAiEnabled(env),
+      aiCredentials: hasAiCredentials(env),
+      cheapestSourceOnly: isCheapestSourceOnly(env),
+      targetRegion: region,
+    },
   };
 }
 
@@ -150,14 +172,29 @@ export async function runCatalogSync(
   }
 
   if (!options.categoriesOnly && client && platformIds.length > 0) {
-    report.products = await importSupplierProducts({
+    const smartResult = await runSmartImport({
       env,
       client,
       dryRun,
       verticalHandles,
       platformIds,
+      cwd,
     });
-    report.fulfillment.routesConfigured = report.products.created + report.products.updated;
+    report.products = {
+      created: smartResult.created,
+      updated: smartResult.updated,
+      skipped: smartResult.skipped,
+      errors: smartResult.errors,
+    };
+    report.smart = smartResult.smart;
+    report.fulfillment.routesConfigured =
+      report.products.created + report.products.updated;
+
+    if (smartResult.smart.aiEnabled && !hasAiCredentials(env)) {
+      report.fulfillment.warnings.push(
+        'CATALOG_AI_ENABLED but no API key — using rule-based scoring only',
+      );
+    }
   } else if (!options.categoriesOnly && platformIds.length > 0) {
     logInfo('dry-run plan: import skipped — admin credentials required for product upsert');
   }
@@ -179,6 +216,17 @@ export function formatSyncSummary(report: SyncReport) {
     `Collections: +${report.collections.created} ~${report.collections.updated} skip ${report.collections.skipped}`,
     `Products: +${report.products.created} ~${report.products.updated} skip ${report.products.skipped}`,
   ];
+
+  if (report.smart) {
+    lines.push(
+      `Smart import (${report.smart.region}): ${report.smart.aggregated} sources → ${report.smart.candidates} imported · ${report.smart.promotions} promo hints`,
+    );
+    if (report.smart.earlyTrendKeywords.length) {
+      lines.push(
+        `Early trends: ${report.smart.earlyTrendKeywords.slice(0, 5).join(', ')}`,
+      );
+    }
+  }
 
   const errors = [
     ...report.collections.errors,

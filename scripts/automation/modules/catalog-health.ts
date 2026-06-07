@@ -1,5 +1,6 @@
 import {buildCatalogPlan} from '../../catalog/sync.ts';
 import {readCatalogEnv} from '../../catalog/lib/parse-env.ts';
+import {isAiEnabled, hasAiCredentials} from '../../catalog/ai/provider.ts';
 import type {AutomationModule, ModuleResult} from '../types.ts';
 
 export const catalogHealthModule: AutomationModule = {
@@ -37,6 +38,25 @@ export const catalogHealthModule: AutomationModule = {
         key: 'compliance',
         severity: 'warn',
         message: `Review Shopify AUP + age gates for: ${plan.ageRestrictedHandles.join(', ')}`,
+      });
+    }
+
+    if (isAiEnabled(env) && !hasAiCredentials(env)) {
+      signals.push({
+        module: 'catalog-health',
+        key: 'ai-credentials',
+        severity: 'warn',
+        message:
+          'CATALOG_AI_ENABLED without API key — trend expansion uses heuristics only',
+      });
+    }
+
+    if (plan.smartImport.cheapestSourceOnly) {
+      signals.push({
+        module: 'catalog-health',
+        key: 'cheapest-source',
+        severity: 'info',
+        message: `Cheapest-source selection ON · region ${plan.smartImport.targetRegion}`,
       });
     }
 

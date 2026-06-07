@@ -1,4 +1,14 @@
-import {buildCatalogPlan, formatSyncSummary, runCatalogSync} from './sync.ts';
+import {
+  buildCatalogPlan,
+  formatSyncSummary,
+  runCatalogSync,
+} from './sync.ts';
+import {readCatalogEnv} from './lib/parse-env.ts';
+import {aggregateSupplierProducts} from './sourcing/aggregator.ts';
+import {scoutTrends} from './ai/trend-scout.ts';
+import {formatPromotionSummary, planPromotions} from './ai/promotion-planner.ts';
+import {scoreProducts, filterImportCandidates, rankScoredProducts} from './ai/product-scorer.ts';
+import {allCollectionHandles} from './config/categories.ts';
 
 function printHelp() {
   console.log(`Lumen Atelier — catalog & dropship automation
@@ -6,6 +16,8 @@ function printHelp() {
 Usage:
   npm run catalog:plan
   npm run catalog:sync [-- --dry-run] [--categories-only] [--import-only]
+  npm run catalog:smart-sync [-- --dry-run]
+  npm run catalog:trends
   npm run catalog:categories
 
 Options:
@@ -21,9 +33,55 @@ Environment (.env):
   CATALOG_SUPPLIER_CSV_PATH=scripts/catalog/feeds/example-products.csv
   FEATURED_COLLECTION_HANDLES=trending-now,beauty-grooming,technology
 
-Fulfillment model: source_seller — orders route to the original platform seller
-via lumen_dropship.* metafields (see scripts/catalog/fulfillment/).
+Smart import (multi-source + cheapest price + AI scoring):
+  CATALOG_CHEAPEST_SOURCE_ONLY=1   # default on — max profit per SKU
+  CATALOG_TARGET_COUNTRY=IL        # regional trend boost
+  CATALOG_AI_ENABLED=1
+  CATALOG_AI_API_KEY=...
+  CATALOG_MIN_PROFIT_PERCENT=40
+  CATALOG_MAX_IMPORT_PER_SYNC=500
+
+Commerce modes: dropshipping, arbitrage, POD, wholesale, marketplace, …
+Fulfillment: source_seller — orders route via lumen_dropship.* metafields
 `);
+}
+
+async function runTrendsOnly(cwd: string) {
+  const env = readCatalogEnv(cwd);
+  const aggregated = await aggregateSupplierProducts({
+    env,
+    verticalHandles: allCollectionHandles(),
+  });
+  const trendScout = await scoutTrends(env, aggregated);
+  const scored = rankScoredProducts(
+    scoreProducts(env, aggregated, trendScout.signals),
+  ).slice(0, 15);
+  const promotions = planPromotions(env, scored);
+
+  console.log(
+    JSON.stringify(
+      {
+        region: trendScout.region,
+        scannedAt: trendScout.scannedAt,
+        signalCount: trendScout.signals.length,
+        earlyTrendKeywords: trendScout.earlyTrendKeywords,
+        topSignals: trendScout.signals.slice(0, 12),
+        topProducts: scored.map((p) => ({
+          title: p.title,
+          composite: p.scores.composite,
+          platform: p.platform,
+          matchedTrends: p.matchedTrends,
+        })),
+        promotions: promotions.slice(0, 10).map((r) => ({
+          action: r.action,
+          title: r.product.title,
+          priority: r.priority,
+        })),
+      },
+      null,
+      2,
+    ),
+  );
 }
 
 async function main() {
@@ -47,10 +105,18 @@ async function main() {
     args.includes('--plan') ||
     process.argv[1]?.includes('catalog:plan');
 
+  const trendsOnly =
+    process.env.CATALOG_CLI_MODE === 'trends' ||
+    process.argv[1]?.includes('catalog:trends');
+
   if (planOnly) {
-    const {readCatalogEnv} = await import('./lib/parse-env.ts');
     const plan = buildCatalogPlan(readCatalogEnv(cwd));
     console.log(JSON.stringify(plan, null, 2));
+    return;
+  }
+
+  if (trendsOnly) {
+    await runTrendsOnly(cwd);
     return;
   }
 
@@ -66,6 +132,9 @@ async function main() {
 
   console.log(formatSyncSummary(report));
   console.log(`Report: .catalog/reports/latest.json`);
+  if (report.smart) {
+    console.log(`Promotions: .catalog/reports/latest-promotions.json`);
+  }
 
   const errorCount =
     report.collections.errors.length + report.products.errors.length;

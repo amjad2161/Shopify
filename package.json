@@ -22,6 +22,8 @@
     "automate:full": "node --experimental-strip-types scripts/automation/index.ts --mode=full --production",
     "catalog:plan": "CATALOG_CLI_MODE=plan node --experimental-strip-types scripts/catalog/index.ts",
     "catalog:sync": "node --experimental-strip-types scripts/catalog/index.ts",
+    "catalog:smart-sync": "node --experimental-strip-types scripts/catalog/index.ts --import-only",
+    "catalog:trends": "CATALOG_CLI_MODE=trends node --experimental-strip-types scripts/catalog/index.ts",
     "catalog:categories": "node --experimental-strip-types scripts/catalog/index.ts --categories-only",
     "ci": "npm run automate:ci"
   },

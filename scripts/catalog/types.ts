@@ -1,5 +1,7 @@
 /** Shared catalog automation types — suppliers, products, fulfillment. */
 
+import type {CommerceModeId} from './config/commerce-modes.ts';
+
 export type FulfillmentMode = 'source_seller' | 'warehouse' | 'hybrid';
 
 export type SupplierPlatformId =
@@ -13,7 +15,14 @@ export type SupplierPlatformId =
   | 'ebay'
   | 'etsy'
   | 'temu'
+  | 'walmart'
+  | 'shein'
+  | 'dhgate'
+  | 'tiktok_shop'
+  | 'wholesale_central'
   | 'manual';
+
+export type {CommerceModeId};
 
 export type CatalogVerticalId =
   | 'beauty-grooming'
@@ -28,6 +37,13 @@ export type CatalogVerticalId =
   | 'adults-only'
   | 'home-living'
   | 'fitness-wellness'
+  | 'jewelry'
+  | 'pets'
+  | 'outdoor-sports'
+  | 'office-supplies'
+  | 'automotive'
+  | 'supplements'
+  | 'eco-sustainable'
   | 'trending';
 
 export type CatalogVertical = {
@@ -41,6 +57,8 @@ export type CatalogVertical = {
   /** 1–100 — higher = prioritize in sync & homepage merchandising. */
   trendingScore: number;
   seoKeywords: string[];
+  /** Business models this vertical supports (dropship, arbitrage, etc.). */
+  commerceModes: CommerceModeId[];
   supplierPlatforms: SupplierPlatformId[];
   fulfillmentMode: FulfillmentMode;
   /** Suggested markup over supplier cost (percent). */
@@ -69,6 +87,48 @@ export type SupplierProduct = {
   sourceUrl?: string;
   cost?: string;
   leadTimeDays?: number;
+  /** Alternative listings for same SKU — kept for audit, not imported. */
+  alternateSources?: Array<{
+    platform: SupplierPlatformId;
+    sellerId: string;
+    cost: string;
+    price: string;
+  }>;
+};
+
+export type ProductFingerprint = string;
+
+export type AggregatedProduct = SupplierProduct & {
+  fingerprint: ProductFingerprint;
+  landedCost: number;
+  rejectedSources: number;
+};
+
+export type TrendSignal = {
+  keyword: string;
+  score: number;
+  region: string;
+  source: 'vertical' | 'seo' | 'ai' | 'early_detect';
+  detectedAt: string;
+};
+
+export type ScoredProduct = AggregatedProduct & {
+  scores: {
+    trend: number;
+    margin: number;
+    demand: number;
+    regional: number;
+    composite: number;
+  };
+  matchedTrends: string[];
+  promote: boolean;
+};
+
+export type PromotionRecommendation = {
+  product: ScoredProduct;
+  action: 'feature' | 'publish' | 'boost_ad' | 'hold_draft';
+  reason: string;
+  priority: number;
 };
 
 export type SupplierAdapter = {
@@ -103,7 +163,28 @@ export type CatalogEnv = {
   EBAY_OAUTH_TOKEN?: string;
   ETSY_API_KEY?: string;
   TEMU_SUPPLIER_API_KEY?: string;
+  WALMART_MARKETPLACE_CLIENT_ID?: string;
+  SHEIN_SUPPLIER_API_KEY?: string;
+  DHGATE_API_KEY?: string;
+  TIKTOK_SHOP_API_KEY?: string;
+  WHOLESALE_CENTRAL_API_KEY?: string;
   FEATURED_COLLECTION_HANDLES?: string;
+  /** AI-assisted catalog (optional — rule-based scoring works without keys). */
+  CATALOG_AI_ENABLED?: string;
+  CATALOG_AI_API_URL?: string;
+  CATALOG_AI_API_KEY?: string;
+  CATALOG_AI_MODEL?: string;
+  /** ISO 3166-1 alpha-2 — boosts regional trend keywords (e.g. IL, US, CA). */
+  CATALOG_TARGET_COUNTRY?: string;
+  CATALOG_TARGET_REGION?: string;
+  CATALOG_TARGET_LOCALE?: string;
+  /** When 1/true, only import cheapest source per product fingerprint. */
+  CATALOG_CHEAPEST_SOURCE_ONLY?: string;
+  CATALOG_MIN_PROFIT_PERCENT?: string;
+  CATALOG_TREND_LOOKAHEAD_DAYS?: string;
+  CATALOG_MAX_IMPORT_PER_SYNC?: string;
+  /** Fallback when CATALOG_AI_API_KEY is unset. */
+  OPENAI_API_KEY?: string;
 };
 
 export type SyncReport = {
@@ -125,6 +206,17 @@ export type SyncReport = {
   fulfillment: {
     routesConfigured: number;
     warnings: string[];
+  };
+  smart?: {
+    region: string;
+    aggregated: number;
+    scored: number;
+    candidates: number;
+    trendSignals: number;
+    earlyTrendKeywords: string[];
+    promotions: number;
+    aiEnabled: boolean;
+    cheapestSourceOnly: boolean;
   };
 };
 

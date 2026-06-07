@@ -50,6 +50,31 @@ export const DROPSHIP_METAFIELDS = {
     type: 'boolean',
     description: 'Requires 18+ age gate in storefront',
   },
+  ai_composite_score: {
+    key: 'ai_composite_score',
+    type: 'number_integer',
+    description: 'AI/rule-based composite product score (0–100)',
+  },
+  ai_trend_score: {
+    key: 'ai_trend_score',
+    type: 'number_integer',
+    description: 'Trend match score from regional + global signals',
+  },
+  matched_trends: {
+    key: 'matched_trends',
+    type: 'single_line_text_field',
+    description: 'Comma-separated trend keywords matched for this SKU',
+  },
+  rejected_sources_count: {
+    key: 'rejected_sources_count',
+    type: 'number_integer',
+    description: 'Alternate supplier listings skipped (cheaper source won)',
+  },
+  alternate_sources_json: {
+    key: 'alternate_sources_json',
+    type: 'json',
+    description: 'Audit trail of non-selected supplier listings',
+  },
 } as const;
 
 export type DropshipMetafieldKey = keyof typeof DROPSHIP_METAFIELDS;

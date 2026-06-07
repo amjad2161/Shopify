@@ -43,6 +43,26 @@ describe('catalog categories', () => {
     expect(restricted).toContain('adults-only');
   });
 
+  it('defines expanded vertical catalog (20+ niches)', () => {
+    expect(CATALOG_VERTICALS.length).toBeGreaterThanOrEqual(20);
+    const handles = new Set(allCollectionHandles());
+    for (const extra of [
+      'jewelry',
+      'pets',
+      'outdoor-sports',
+      'supplements',
+      'eco-sustainable',
+    ]) {
+      expect(handles.has(extra)).toBe(true);
+    }
+  });
+
+  it('assigns commerce modes to every vertical', () => {
+    for (const vertical of CATALOG_VERTICALS) {
+      expect(vertical.commerceModes.length).toBeGreaterThan(0);
+    }
+  });
+
   it('uses source_seller fulfillment for every vertical', () => {
     for (const vertical of CATALOG_VERTICALS) {
       expect(vertical.fulfillmentMode).toBe('source_seller');
