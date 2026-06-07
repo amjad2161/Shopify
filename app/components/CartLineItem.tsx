@@ -5,6 +5,7 @@ import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
 import {ProductPrice} from './ProductPrice';
 import {useAside} from './Aside';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 import type {
   CartApiQueryFragment,
   CartLineFragment,
@@ -27,6 +28,7 @@ export function CartLineItem({
   line: CartLine;
   childrenMap: LineItemChildrenMap;
 }) {
+  const {t} = useI18n();
   const {id, merchandise} = line;
   const {product, title, image, selectedOptions} = merchandise;
   const lineItemUrl = useVariantUrl(product.handle, selectedOptions);
@@ -79,7 +81,7 @@ export function CartLineItem({
       {lineItemChildren ? (
         <div>
           <p id={childrenLabelId} className="sr-only">
-            Line items with {product.title}
+            {t('cart.lineChildren', {product: product.title})}
           </p>
           <ul aria-labelledby={childrenLabelId} className="cart-line-children">
             {lineItemChildren.map((childLine) => (
@@ -103,6 +105,8 @@ export function CartLineItem({
  * hasn't yet responded that it was successfully added to the cart.
  */
 function CartLineQuantity({line}: {line: CartLine}) {
+  const {t} = useI18n();
+
   if (!line || typeof line?.quantity === 'undefined') return null;
   const {id: lineId, quantity, isOptimistic} = line;
   const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
@@ -110,10 +114,10 @@ function CartLineQuantity({line}: {line: CartLine}) {
 
   return (
     <div className="cart-line-quantity">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
+      <small>{t('cart.quantity', {count: quantity})} &nbsp;&nbsp;</small>
       <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
         <button
-          aria-label="Decrease quantity"
+          aria-label={t('cart.decreaseQuantity')}
           disabled={quantity <= 1 || !!isOptimistic}
           name="decrease-quantity"
           value={prevQuantity}
@@ -124,7 +128,7 @@ function CartLineQuantity({line}: {line: CartLine}) {
       &nbsp;
       <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
         <button
-          aria-label="Increase quantity"
+          aria-label={t('cart.increaseQuantity')}
           name="increase-quantity"
           value={nextQuantity}
           disabled={!!isOptimistic}
@@ -150,15 +154,17 @@ function CartLineRemoveButton({
   lineIds: string[];
   disabled: boolean;
 }) {
+  const {t, path} = useI18n();
+
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={path('/cart')}
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
       <button disabled={disabled} type="submit">
-        Remove
+        {t('cart.remove')}
       </button>
     </CartForm>
   );
@@ -171,12 +177,13 @@ function CartLineUpdateButton({
   children: React.ReactNode;
   lines: CartLineUpdateInput[];
 }) {
+  const {path} = useI18n();
   const lineIds = lines.map((line) => line.id);
 
   return (
     <CartForm
       fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
+      route={path('/cart')}
       action={CartForm.ACTIONS.LinesUpdate}
       inputs={{lines}}
     >

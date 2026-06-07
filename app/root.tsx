@@ -18,6 +18,8 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
 import {BRAND, resolveBrandUrl} from '~/lib/brand';
+import {I18nProvider} from '~/lib/i18n/I18nProvider';
+import {resolveLocaleFromRequest, translate} from '~/lib/i18n';
 
 export type RootLoader = typeof loader;
 
@@ -88,10 +90,12 @@ export async function loader(args: Route.LoaderArgs) {
   const criticalData = await loadCriticalData(args);
 
   const {storefront, env} = args.context;
+  const locale = resolveLocaleFromRequest(args.request);
 
   return {
     ...deferredData,
     ...criticalData,
+    locale,
     brandUrl: resolveBrandUrl(env),
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -159,13 +163,20 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
+  const data = useRouteLoaderData<RootLoader>('root');
+  const locale = data?.locale;
+  const htmlLang = locale?.intlTag ?? 'en-US';
+  const htmlDir = locale?.dir ?? 'ltr';
+  const metaDescription = locale
+    ? translate(locale.uiLocale, 'brand.description')
+    : BRAND.description;
 
   return (
-    <html lang="en">
+    <html lang={htmlLang} dir={htmlDir}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <meta name="description" content={BRAND.description} />
+        <meta name="description" content={metaDescription} />
         <meta name="theme-color" content="#faf8f5" />
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>
@@ -190,20 +201,25 @@ export default function App() {
   }
 
   return (
-    <Analytics.Provider
-      cart={data.cart}
-      shop={data.shop}
-      consent={data.consent}
-    >
-      <PageLayout {...data}>
-        <Outlet />
-      </PageLayout>
-    </Analytics.Provider>
+    <I18nProvider locale={data.locale}>
+      <Analytics.Provider
+        cart={data.cart}
+        shop={data.shop}
+        consent={data.consent}
+      >
+        <PageLayout {...data}>
+          <Outlet />
+        </PageLayout>
+      </Analytics.Provider>
+    </I18nProvider>
   );
 }
 
 export function ErrorBoundary() {
   const error = useRouteError();
+  const data = useRouteLoaderData<RootLoader>('root');
+  const locale = data?.locale;
+  const uiLocale = locale?.uiLocale ?? 'en';
   const showDetails = import.meta.env.DEV;
   let errorMessage = 'Unknown error';
   let errorStatus = 500;
@@ -220,11 +236,13 @@ export function ErrorBoundary() {
       <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--color-accent)]">
         {BRAND.name}
       </p>
-      <h1 className="font-display mt-4 text-4xl">Something went wrong</h1>
+      <h1 className="font-display mt-4 text-4xl">
+        {translate(uiLocale, 'error.title')}
+      </h1>
       <p className="mt-2 text-[var(--color-ink-muted)]">
         {errorStatus === 404
-          ? 'We could not find that page.'
-          : 'Please try again in a moment.'}
+          ? translate(uiLocale, 'error.notFound')
+          : translate(uiLocale, 'error.generic')}
       </p>
       {showDetails && errorMessage && (
         <pre className="mt-6 overflow-x-auto rounded-lg bg-[var(--color-canvas-deep)] p-4 text-left text-sm">
@@ -233,9 +251,9 @@ export function ErrorBoundary() {
       )}
       <a
         className="mt-8 inline-block rounded-full bg-[var(--color-ink)] px-6 py-3 text-sm text-white"
-        href="/"
+        href={locale ? `/${locale.path}` : '/'}
       >
-        Return home
+        {translate(uiLocale, 'error.returnHome')}
       </a>
     </div>
   );

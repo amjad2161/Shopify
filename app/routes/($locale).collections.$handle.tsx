@@ -1,15 +1,25 @@
 import {redirect, useLoaderData} from 'react-router';
-import type {Route} from './+types/collections.$handle';
+import type {Route} from './+types/($locale).collections.$handle';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
 import type {ProductItemFragment} from 'storefrontapi.generated';
 
-import {pageTitle} from '~/lib/brand';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizePath,
+  localizedPageTitle,
+  translate,
+} from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: pageTitle(data?.collection.title ?? 'Collection')}];
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page =
+    data?.collection.title ??
+    translate(locale.uiLocale, 'meta.collection');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -34,7 +44,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   });
 
   if (!handle) {
-    throw redirect('/collections');
+    throw redirect(localizePath('/collections', params.locale));
   }
 
   const [{collection}] = await Promise.all([

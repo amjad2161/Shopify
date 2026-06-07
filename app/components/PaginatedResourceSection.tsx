@@ -1,5 +1,6 @@
 import * as React from 'react';
 import {Pagination} from '@shopify/hydrogen';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 
 /**
  * <PaginatedResourceSection> encapsulates the previous and next pagination behaviors throughout your application.
@@ -15,6 +16,8 @@ export function PaginatedResourceSection<NodesType>({
   ariaLabel?: string;
   resourcesClassName?: string;
 }) {
+  const {t} = useI18n();
+
   return (
     <Pagination connection={connection}>
       {({nodes, isLoading, PreviousLink, NextLink}) => {
@@ -26,10 +29,10 @@ export function PaginatedResourceSection<NodesType>({
           <div>
             <PreviousLink>
               {isLoading ? (
-                'Loading...'
+                t('paginated.loading')
               ) : (
                 <span>
-                  <span aria-hidden="true">↑</span> Load previous
+                  <span aria-hidden="true">↑</span> {t('paginated.loadPrevious')}
                 </span>
               )}
             </PreviousLink>
@@ -46,10 +49,10 @@ export function PaginatedResourceSection<NodesType>({
             )}
             <NextLink>
               {isLoading ? (
-                'Loading...'
+                t('paginated.loading')
               ) : (
                 <span>
-                  Load more <span aria-hidden="true">↓</span>
+                  {t('paginated.loadMore')} <span aria-hidden="true">↓</span>
                 </span>
               )}
             </NextLink>

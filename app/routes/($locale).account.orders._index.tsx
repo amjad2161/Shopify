@@ -4,7 +4,7 @@ import {
   useNavigation,
   useSearchParams,
 } from 'react-router';
-import type {Route} from './+types/account.orders._index';
+import type {Route} from './+types/($locale).account.orders._index';
 import {useRef} from 'react';
 import {
   Money,
@@ -23,14 +23,23 @@ import type {
   OrderItemFragment,
 } from 'customer-accountapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
 type OrdersLoaderData = {
   customer: CustomerOrdersFragment;
   filters: OrderFilterParams;
 };
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: 'Orders'}];
+export const meta: Route.MetaFunction = ({params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page = translate(locale.uiLocale, 'account.ordersMetaTitle');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader({request, context}: Route.LoaderArgs) {
@@ -93,22 +102,24 @@ function OrdersTable({
 }
 
 function EmptyOrders({hasFilters = false}: {hasFilters?: boolean}) {
+  const {t, path} = useI18n();
+
   return (
     <div>
       {hasFilters ? (
         <>
-          <p>No orders found matching your search.</p>
+          <p>{t('account.noOrdersFiltered')}</p>
           <br />
           <p>
-            <Link to="/account/orders">Clear filters →</Link>
+            <Link to={path('/account/orders')}>{t('account.clearFilters')}</Link>
           </p>
         </>
       ) : (
         <>
-          <p>You haven&apos;t placed any orders yet.</p>
+          <p>{t('account.noOrders')}</p>
           <br />
           <p>
-            <Link to="/collections">Start Shopping →</Link>
+            <Link to={path('/collections')}>{t('account.startShopping')}</Link>
           </p>
         </>
       )}
@@ -121,6 +132,7 @@ function OrderSearchForm({
 }: {
   currentFilters: OrderFilterParams;
 }) {
+  const {t} = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigation = useNavigation();
   const isSearching =
@@ -153,25 +165,27 @@ function OrderSearchForm({
       ref={formRef}
       onSubmit={handleSubmit}
       className="order-search-form"
-      aria-label="Search orders"
+      aria-label={t('account.filterLabel')}
     >
       <fieldset className="order-search-fieldset">
-        <legend className="order-search-legend">Filter Orders</legend>
+        <legend className="order-search-legend">
+          {t('account.filterLegend')}
+        </legend>
 
         <div className="order-search-inputs">
           <input
             type="search"
             name={ORDER_FILTER_FIELDS.NAME}
-            placeholder="Order #"
-            aria-label="Order number"
+            placeholder={t('account.orderNumberPlaceholder')}
+            aria-label={t('account.orderNumberLabel')}
             defaultValue={currentFilters.name || ''}
             className="order-search-input"
           />
           <input
             type="search"
             name={ORDER_FILTER_FIELDS.CONFIRMATION_NUMBER}
-            placeholder="Confirmation #"
-            aria-label="Confirmation number"
+            placeholder={t('account.confirmationPlaceholder')}
+            aria-label={t('account.confirmationLabel')}
             defaultValue={currentFilters.confirmationNumber || ''}
             className="order-search-input"
           />
@@ -179,7 +193,7 @@ function OrderSearchForm({
 
         <div className="order-search-buttons">
           <button type="submit" disabled={isSearching}>
-            {isSearching ? 'Searching' : 'Search'}
+            {isSearching ? t('account.searching') : t('account.search')}
           </button>
           {hasFilters && (
             <button
@@ -190,7 +204,7 @@ function OrderSearchForm({
                 formRef.current?.reset();
               }}
             >
-              Clear
+              {t('account.clear')}
             </button>
           )}
         </div>
@@ -200,21 +214,33 @@ function OrderSearchForm({
 }
 
 function OrderItem({order}: {order: OrderItemFragment}) {
+  const {t, path, locale} = useI18n();
   const fulfillmentStatus = flattenConnection(order.fulfillments)[0]?.status;
+  const orderPath = path(`/account/orders/${btoa(order.id)}`);
+  const processedDate = new Intl.DateTimeFormat(locale.intlTag, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(order.processedAt));
+
   return (
     <>
       <fieldset>
-        <Link to={`/account/orders/${btoa(order.id)}`}>
+        <Link to={orderPath}>
           <strong>#{order.number}</strong>
         </Link>
-        <p>{new Date(order.processedAt).toDateString()}</p>
+        <p>{processedDate}</p>
         {order.confirmationNumber && (
-          <p>Confirmation: {order.confirmationNumber}</p>
+          <p>
+            {t('account.confirmationDisplay', {
+              number: order.confirmationNumber,
+            })}
+          </p>
         )}
         <p>{order.financialStatus}</p>
         {fulfillmentStatus && <p>{fulfillmentStatus}</p>}
         <Money data={order.totalPrice} />
-        <Link to={`/account/orders/${btoa(order.id)}`}>View Order →</Link>
+        <Link to={orderPath}>{t('account.viewOrder')}</Link>
       </fieldset>
       <br />
     </>

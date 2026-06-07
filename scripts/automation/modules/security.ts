@@ -10,7 +10,10 @@ export const securityModule: AutomationModule = {
     const started = Date.now();
     const signals: ModuleResult['signals'] = [];
 
-    const newsletterPath = join(ctx.cwd, 'app/routes/newsletter.tsx');
+    const newsletterPath = join(
+      ctx.cwd,
+      'app/routes/($locale).newsletter.tsx',
+    );
     const newsletter = readFileSync(newsletterPath, 'utf8');
 
     const hasHoneypot =

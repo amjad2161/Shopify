@@ -1,5 +1,6 @@
 import {type FetcherWithComponents} from 'react-router';
 import {CartForm, type OptimisticCartLineInput} from '@shopify/hydrogen';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 
 export function AddToCartButton({
   analytics,
@@ -14,8 +15,14 @@ export function AddToCartButton({
   lines: Array<OptimisticCartLineInput>;
   onClick?: () => void;
 }) {
+  const {path} = useI18n();
+
   return (
-    <CartForm route="/cart" inputs={{lines}} action={CartForm.ACTIONS.LinesAdd}>
+    <CartForm
+      route={path('/cart')}
+      inputs={{lines}}
+      action={CartForm.ACTIONS.LinesAdd}
+    >
       {(fetcher: FetcherWithComponents<any>) => (
         <>
           <input

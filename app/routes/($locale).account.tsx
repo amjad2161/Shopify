@@ -5,8 +5,9 @@ import {
   Outlet,
   useLoaderData,
 } from 'react-router';
-import type {Route} from './+types/account';
+import type {Route} from './+types/($locale).account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import {useI18n} from '~/lib/i18n';
 
 export function shouldRevalidate() {
   return true;
@@ -36,12 +37,13 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function AccountLayout() {
   const {customer} = useLoaderData<typeof loader>();
+  const {t} = useI18n();
 
   const heading = customer
     ? customer.firstName
-      ? `Welcome, ${customer.firstName}`
-      : `Welcome to your account.`
-    : 'Account Details';
+      ? t('account.welcome', {name: customer.firstName})
+      : t('account.welcomeDefault')
+    : t('account.details');
 
   return (
     <div className="account">
@@ -56,6 +58,8 @@ export default function AccountLayout() {
 }
 
 function AccountMenu() {
+  const {t, path} = useI18n();
+
   function isActiveStyle({
     isActive,
     isPending,
@@ -71,16 +75,16 @@ function AccountMenu() {
 
   return (
     <nav role="navigation">
-      <NavLink to="/account/orders" style={isActiveStyle}>
-        Orders &nbsp;
+      <NavLink to={path('/account/orders')} style={isActiveStyle}>
+        {t('account.orders')} &nbsp;
       </NavLink>
       &nbsp;|&nbsp;
-      <NavLink to="/account/profile" style={isActiveStyle}>
-        &nbsp; Profile &nbsp;
+      <NavLink to={path('/account/profile')} style={isActiveStyle}>
+        &nbsp; {t('account.profile')} &nbsp;
       </NavLink>
       &nbsp;|&nbsp;
-      <NavLink to="/account/addresses" style={isActiveStyle}>
-        &nbsp; Addresses &nbsp;
+      <NavLink to={path('/account/addresses')} style={isActiveStyle}>
+        &nbsp; {t('account.addresses')} &nbsp;
       </NavLink>
       &nbsp;|&nbsp;
       <Logout />
@@ -89,9 +93,11 @@ function AccountMenu() {
 }
 
 function Logout() {
+  const {t} = useI18n();
+
   return (
     <Form className="account-logout" method="POST" action="/account/logout">
-      &nbsp;<button type="submit">Sign out</button>
+      &nbsp;<button type="submit">{t('account.signOut')}</button>
     </Form>
   );
 }

@@ -1,12 +1,21 @@
 import {useLoaderData} from 'react-router';
-import type {Route} from './+types/blogs.$blogHandle.$articleHandle';
+import type {Route} from './+types/($locale).blogs.$blogHandle.$articleHandle';
 import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
-import {pageTitle} from '~/lib/brand';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: pageTitle(data?.article.title ?? 'Article')}];
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page =
+    data?.article.title ?? translate(locale.uiLocale, 'meta.article');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -69,9 +78,10 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Article() {
   const {article} = useLoaderData<typeof loader>();
+  const {locale} = useI18n();
   const {title, image, contentHtml, author} = article;
 
-  const publishedDate = new Intl.DateTimeFormat('en-US', {
+  const publishedDate = new Intl.DateTimeFormat(locale.intlTag, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

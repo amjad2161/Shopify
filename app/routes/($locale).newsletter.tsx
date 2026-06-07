@@ -1,5 +1,6 @@
 import {data} from 'react-router';
-import type {Route} from './+types/newsletter';
+import type {Route} from './+types/($locale).newsletter';
+import {findLocaleByStorefrontI18n, translate} from '~/lib/i18n';
 
 const CUSTOMER_CREATE_MUTATION = `#graphql
   mutation NewsletterCustomerCreate($input: CustomerCreateInput!) {
@@ -33,6 +34,9 @@ export async function loader() {
 }
 
 export async function action({request, context}: Route.ActionArgs) {
+  const locale = findLocaleByStorefrontI18n(context.storefront.i18n);
+  const uiLocale = locale.uiLocale;
+
   if (request.method !== 'POST') {
     return data({error: 'Method not allowed'}, {status: 405});
   }
@@ -44,7 +48,10 @@ export async function action({request, context}: Route.ActionArgs) {
 
   if (!email || !isValidEmail(email)) {
     return data(
-      {ok: false as const, error: 'Enter a valid email address.'},
+      {
+        ok: false as const,
+        error: translate(uiLocale, 'newsletter.invalidEmail'),
+      },
       {status: 400},
     );
   }
@@ -66,7 +73,7 @@ export async function action({request, context}: Route.ActionArgs) {
     if (payload?.customer?.acceptsMarketing) {
       return data({
         ok: true as const,
-        message: 'Thanks — you are on the list.',
+        message: translate(uiLocale, 'newsletter.success'),
       });
     }
 
@@ -76,8 +83,7 @@ export async function action({request, context}: Route.ActionArgs) {
     if (taken) {
       return data({
         ok: true as const,
-        message:
-          'If this email is already in our system, marketing preferences will stay as configured in your account.',
+        message: translate(uiLocale, 'newsletter.taken'),
       });
     }
 
@@ -85,8 +91,7 @@ export async function action({request, context}: Route.ActionArgs) {
       errors
         .map((error: {message?: string | null}) => error?.message)
         .filter(Boolean)
-        .join(' ') ||
-      'We could not add that email right now. Please try again shortly.';
+        .join(' ') || translate(uiLocale, 'newsletter.genericError');
 
     return data({ok: false as const, error: message}, {status: 400});
   } catch (error) {
@@ -94,7 +99,7 @@ export async function action({request, context}: Route.ActionArgs) {
     return data(
       {
         ok: false as const,
-        error: 'We could not process your subscription. Please try again shortly.',
+        error: translate(uiLocale, 'newsletter.serverError'),
       },
       {status: 500},
     );

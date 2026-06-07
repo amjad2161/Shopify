@@ -8,15 +8,24 @@ import {
   useNavigation,
   useOutletContext,
 } from 'react-router';
-import type {Route} from './+types/account.profile';
+import type {Route} from './+types/($locale).account.profile';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
 export type ActionResponse = {
   error: string | null;
   customer: CustomerFragment | null;
 };
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: 'Profile'}];
+export const meta: Route.MetaFunction = ({params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page = translate(locale.uiLocale, 'account.profile');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader({context}: Route.LoaderArgs) {
@@ -84,33 +93,34 @@ export default function AccountProfile() {
   const {state} = useNavigation();
   const action = useActionData<ActionResponse>();
   const customer = action?.customer ?? account?.customer;
+  const {t} = useI18n();
 
   return (
     <div className="account-profile">
-      <h2>My profile</h2>
+      <h2>{t('account.profileHeading')}</h2>
       <br />
       <Form method="PUT">
-        <legend>Personal information</legend>
+        <legend>{t('account.personalInfo')}</legend>
         <fieldset>
-          <label htmlFor="firstName">First name</label>
+          <label htmlFor="firstName">{t('account.firstName')}</label>
           <input
             id="firstName"
             name="firstName"
             type="text"
             autoComplete="given-name"
-            placeholder="First name"
-            aria-label="First name"
+            placeholder={t('account.firstName')}
+            aria-label={t('account.firstName')}
             defaultValue={customer.firstName ?? ''}
             minLength={2}
           />
-          <label htmlFor="lastName">Last name</label>
+          <label htmlFor="lastName">{t('account.lastName')}</label>
           <input
             id="lastName"
             name="lastName"
             type="text"
             autoComplete="family-name"
-            placeholder="Last name"
-            aria-label="Last name"
+            placeholder={t('account.lastName')}
+            aria-label={t('account.lastName')}
             defaultValue={customer.lastName ?? ''}
             minLength={2}
           />
@@ -125,7 +135,7 @@ export default function AccountProfile() {
           <br />
         )}
         <button type="submit" disabled={state !== 'idle'}>
-          {state !== 'idle' ? 'Updating' : 'Update'}
+          {state !== 'idle' ? t('account.updating') : t('account.update')}
         </button>
       </Form>
     </div>

@@ -10,11 +10,9 @@ import {AnnouncementBar} from '~/components/AnnouncementBar';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
 import {CartMain} from '~/components/CartMain';
-import {
-  SEARCH_ENDPOINT,
-  SearchFormPredictive,
-} from '~/components/SearchFormPredictive';
+import {SearchFormPredictive} from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -58,9 +56,11 @@ export function PageLayout({
 }
 
 function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
+  const {t} = useI18n();
+
   return (
-    <Aside type="cart" heading="CART">
-      <Suspense fallback={<p>Loading cart ...</p>}>
+    <Aside type="cart" heading={t('cart.heading')}>
+      <Suspense fallback={<p>{t('cart.loading')}</p>}>
         <Await resolve={cart}>
           {(cart) => {
             return <CartMain cart={cart} layout="aside" />;
@@ -72,9 +72,11 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 }
 
 function SearchAside() {
+  const {t, path} = useI18n();
   const queriesDatalistId = useId();
+
   return (
-    <Aside type="search" heading="SEARCH">
+    <Aside type="search" heading={t('search.heading')}>
       <div className="predictive-search">
         <br />
         <SearchFormPredictive>
@@ -84,13 +86,13 @@ function SearchAside() {
                 name="q"
                 onChange={fetchResults}
                 onFocus={fetchResults}
-                placeholder="Search"
+                placeholder={t('search.placeholder')}
                 ref={inputRef}
                 type="search"
                 list={queriesDatalistId}
               />
               &nbsp;
-              <button onClick={goToSearch}>Search</button>
+              <button onClick={goToSearch}>{t('search.placeholder')}</button>
             </>
           )}
         </SearchFormPredictive>
@@ -100,7 +102,7 @@ function SearchAside() {
             const {articles, collections, pages, products, queries} = items;
 
             if (state === 'loading' && term.current) {
-              return <div>Loading...</div>;
+              return <div>{t('search.loading')}</div>;
             }
 
             if (!total) {
@@ -136,10 +138,11 @@ function SearchAside() {
                 {term.current && total ? (
                   <Link
                     onClick={closeSearch}
-                    to={`${SEARCH_ENDPOINT}?q=${term.current}`}
+                    to={`${path('/search')}?q=${term.current}`}
                   >
                     <p>
-                      View all results for <q>{term.current}</q>
+                      {t('search.viewAll')}{' '}
+                      <q>{term.current}</q>
                       &nbsp; →
                     </p>
                   </Link>
@@ -160,10 +163,12 @@ function MobileMenuAside({
   header: PageLayoutProps['header'];
   publicStoreDomain: PageLayoutProps['publicStoreDomain'];
 }) {
+  const {t} = useI18n();
+
   return (
     header.menu &&
     header.shop.primaryDomain?.url && (
-      <Aside type="mobile" heading="MENU">
+      <Aside type="mobile" heading={t('nav.menu')}>
         <HeaderMenu
           menu={header.menu}
           viewport="mobile"

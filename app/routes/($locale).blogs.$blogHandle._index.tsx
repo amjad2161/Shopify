@@ -1,14 +1,23 @@
 import {Link, useLoaderData} from 'react-router';
-import type {Route} from './+types/blogs.$blogHandle._index';
+import type {Route} from './+types/($locale).blogs.$blogHandle._index';
 import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import type {ArticleItemFragment} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 
-import {pageTitle} from '~/lib/brand';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: pageTitle(data?.blog.title ?? 'Journal')}];
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page =
+    data?.blog.title ?? translate(locale.uiLocale, 'meta.journal');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -91,14 +100,17 @@ function ArticleItem({
   article: ArticleItemFragment;
   loading?: HTMLImageElement['loading'];
 }) {
-  const publishedAt = new Intl.DateTimeFormat('en-US', {
+  const {path, locale} = useI18n();
+  const publishedAt = new Intl.DateTimeFormat(locale.intlTag, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   }).format(new Date(article.publishedAt!));
   return (
     <div className="blog-article" key={article.id}>
-      <Link to={`/blogs/${article.blog.handle}/${article.handle}`}>
+      <Link
+        to={path(`/blogs/${article.blog.handle}/${article.handle}`)}
+      >
         {article.image && (
           <div className="blog-article-image">
             <Image

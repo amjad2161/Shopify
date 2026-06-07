@@ -1,14 +1,22 @@
 import {Link, useLoaderData} from 'react-router';
-import type {Route} from './+types/blogs._index';
+import type {Route} from './+types/($locale).blogs._index';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import type {BlogsQuery} from 'storefrontapi.generated';
-import {pageTitle} from '~/lib/brand';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0];
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: pageTitle('Journal')}];
+export const meta: Route.MetaFunction = ({params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page = translate(locale.uiLocale, 'blogs.heading');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -53,10 +61,11 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Blogs() {
   const {blogs} = useLoaderData<typeof loader>();
+  const {t, path} = useI18n();
 
   return (
     <div className="blogs">
-      <h1>Blogs</h1>
+      <h1>{t('blogs.heading')}</h1>
       <div className="blogs-grid">
         <PaginatedResourceSection<BlogNode> connection={blogs}>
           {({node: blog}) => (
@@ -64,7 +73,7 @@ export default function Blogs() {
               className="blog"
               key={blog.handle}
               prefetch="intent"
-              to={`/blogs/${blog.handle}`}
+              to={path(`/blogs/${blog.handle}`)}
             >
               <h2>{blog.title}</h2>
             </Link>

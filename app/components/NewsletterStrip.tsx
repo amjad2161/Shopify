@@ -1,6 +1,7 @@
 import {useEffect, useRef} from 'react';
 import {useFetcher} from 'react-router';
 import {BRAND} from '~/lib/brand';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 
 type NewsletterActionData = {
   ok?: boolean;
@@ -9,6 +10,7 @@ type NewsletterActionData = {
 };
 
 export function NewsletterStrip() {
+  const {t, path} = useI18n();
   const fetcher = useFetcher<NewsletterActionData>();
   const formRef = useRef<HTMLFormElement>(null);
   const isSubmitting = fetcher.state !== 'idle';
@@ -24,23 +26,20 @@ export function NewsletterStrip() {
     <section className="newsletter-strip" aria-labelledby="newsletter-heading">
       <div className="newsletter-strip-inner">
         <div className="newsletter-strip-copy">
-          <p className="newsletter-strip-eyebrow">The inner circle</p>
+          <p className="newsletter-strip-eyebrow">{t('newsletter.eyebrow')}</p>
           <h2 id="newsletter-heading" className="font-display">
-            First access to new drops
+            {t('newsletter.title')}
           </h2>
-          <p>
-            Join {BRAND.name} for early releases, studio notes, and members-only
-            offers — no noise, just craft.
-          </p>
+          <p>{t('newsletter.body', {brand: BRAND.name})}</p>
         </div>
         <fetcher.Form
           ref={formRef}
           className="newsletter-strip-form"
           method="post"
-          action="/newsletter"
+          action={path('/newsletter')}
         >
           <label className="sr-only" htmlFor="newsletter-email">
-            Email address
+            {t('newsletter.emailLabel')}
           </label>
           <input
             id="newsletter-email"
@@ -56,14 +55,16 @@ export function NewsletterStrip() {
             }
           />
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Subscribing…' : 'Subscribe'}
+            {isSubmitting ? t('newsletter.subscribing') : t('newsletter.subscribe')}
           </button>
         </fetcher.Form>
         {(response?.message || response?.error) && (
           <p
             id="newsletter-status"
             className={`newsletter-strip-status ${
-              response.ok ? 'newsletter-strip-status-success' : 'newsletter-strip-status-error'
+              response.ok
+                ? 'newsletter-strip-status-success'
+                : 'newsletter-strip-status-error'
             }`}
             role="status"
             aria-live="polite"

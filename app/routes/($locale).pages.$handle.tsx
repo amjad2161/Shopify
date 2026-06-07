@@ -1,11 +1,18 @@
 import {useLoaderData} from 'react-router';
-import type {Route} from './+types/pages.$handle';
+import type {Route} from './+types/($locale).pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+} from '~/lib/i18n';
 
-import {pageTitle} from '~/lib/brand';
-
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: pageTitle(data?.page.title ?? 'Page')}];
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page =
+    data?.page.title ?? translate(locale.uiLocale, 'meta.page');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {

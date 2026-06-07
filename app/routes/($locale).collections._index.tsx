@@ -1,8 +1,21 @@
 import {useLoaderData, Link} from 'react-router';
-import type {Route} from './+types/collections._index';
+import type {Route} from './+types/($locale).collections._index';
 import {getPaginationVariables, Image} from '@shopify/hydrogen';
 import type {CollectionFragment} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
+
+export const meta: Route.MetaFunction = ({params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page = translate(locale.uiLocale, 'collections.heading');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+};
 
 export async function loader(args: Route.LoaderArgs) {
   // Start fetching non-critical data without blocking time to first byte
@@ -44,10 +57,11 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export default function Collections() {
   const {collections} = useLoaderData<typeof loader>();
+  const {t} = useI18n();
 
   return (
     <div className="collections">
-      <h1>Collections</h1>
+      <h1>{t('collections.heading')}</h1>
       <PaginatedResourceSection<CollectionFragment>
         connection={collections}
         resourcesClassName="collections-grid"
@@ -71,11 +85,13 @@ function CollectionItem({
   collection: CollectionFragment;
   index: number;
 }) {
+  const {path} = useI18n();
+
   return (
     <Link
       className="collection-item"
       key={collection.id}
-      to={`/collections/${collection.handle}`}
+      to={path(`/collections/${collection.handle}`)}
       prefetch="intent"
     >
       {collection?.image && (

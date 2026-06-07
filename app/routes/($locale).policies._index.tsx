@@ -1,6 +1,19 @@
 import {useLoaderData, Link} from 'react-router';
-import type {Route} from './+types/policies._index';
+import type {Route} from './+types/($locale).policies._index';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
+
+export const meta: Route.MetaFunction = ({params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page = translate(locale.uiLocale, 'policies.heading');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
+};
 
 export async function loader({context}: Route.LoaderArgs) {
   const data: PoliciesQuery = await context.storefront.query(POLICIES_QUERY);
@@ -23,14 +36,15 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function Policies() {
   const {policies} = useLoaderData<typeof loader>();
+  const {t, path} = useI18n();
 
   return (
     <div className="policies">
-      <h1>Policies</h1>
+      <h1>{t('policies.heading')}</h1>
       <div>
         {policies.map((policy) => (
           <fieldset key={policy.id}>
-            <Link to={`/policies/${policy.handle}`}>{policy.title}</Link>
+            <Link to={path(`/policies/${policy.handle}`)}>{policy.title}</Link>
           </fieldset>
         ))}
       </div>

@@ -2,6 +2,8 @@ import {Suspense} from 'react';
 import {Await, NavLink} from 'react-router';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
 import {BRAND} from '~/lib/brand';
+import {stripLocalePrefix} from '~/lib/i18n/paths';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 
 interface FooterProps {
   footer: Promise<FooterQuery | null>;
@@ -14,6 +16,8 @@ export function Footer({
   header,
   publicStoreDomain,
 }: FooterProps) {
+  const {t, path} = useI18n();
+
   return (
     <Suspense>
       <Await resolve={footerPromise}>
@@ -21,18 +25,21 @@ export function Footer({
           <footer className="footer">
             <div className="footer-brand">
               <p className="font-display footer-brand-name">{BRAND.name}</p>
-              <p className="footer-brand-tagline">{BRAND.tagline}</p>
+              <p className="footer-brand-tagline">{t('brand.tagline')}</p>
             </div>
             {footer?.menu && header.shop.primaryDomain?.url && (
               <FooterMenu
                 menu={footer.menu}
                 primaryDomainUrl={header.shop.primaryDomain.url}
                 publicStoreDomain={publicStoreDomain}
+                path={path}
               />
             )}
             <p className="footer-note">
-              © {new Date().getFullYear()} {BRAND.name}. Crafted with Shopify
-              Hydrogen.
+              {t('footer.note', {
+                year: new Date().getFullYear(),
+                brand: BRAND.name,
+              })}
             </p>
           </footer>
         )}
@@ -45,22 +52,24 @@ function FooterMenu({
   menu,
   primaryDomainUrl,
   publicStoreDomain,
+  path,
 }: {
   menu: FooterQuery['menu'];
   primaryDomainUrl: FooterProps['header']['shop']['primaryDomain']['url'];
   publicStoreDomain: string;
+  path: (internalPath: string) => string;
 }) {
   return (
     <nav className="footer-menu" role="navigation">
       {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
         if (!item.url) return null;
-        // if the url is internal, we strip the domain
-        const url =
+        const isInternal =
           item.url.includes('myshopify.com') ||
           item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
+          item.url.includes(primaryDomainUrl);
+        const url = isInternal
+          ? path(stripLocalePrefix(new URL(item.url).pathname))
+          : item.url;
         const isExternal = !url.startsWith('/');
         return isExternal ? (
           <a href={url} key={item.id} rel="noopener noreferrer" target="_blank">

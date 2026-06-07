@@ -1,12 +1,20 @@
 import {useLoaderData, data, type HeadersFunction} from 'react-router';
-import type {Route} from './+types/cart';
+import type {Route} from './+types/($locale).cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
 import {CartMain} from '~/components/CartMain';
-import {pageTitle} from '~/lib/brand';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = () => {
-  return [{title: pageTitle('Cart')}];
+export const meta: Route.MetaFunction = ({params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page = translate(locale.uiLocale, 'nav.cart');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -104,10 +112,11 @@ export async function loader({context}: Route.LoaderArgs) {
 
 export default function Cart() {
   const cart = useLoaderData<typeof loader>();
+  const {t} = useI18n();
 
   return (
     <div className="cart">
-      <h1>Cart</h1>
+      <h1>{t('nav.cart')}</h1>
       <CartMain layout="page" cart={cart} />
     </div>
   );

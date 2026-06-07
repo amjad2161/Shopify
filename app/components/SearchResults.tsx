@@ -1,6 +1,7 @@
 import {Link} from 'react-router';
 import {Image, Money, Pagination} from '@shopify/hydrogen';
 import {urlWithTrackingParams, type RegularSearchReturn} from '~/lib/search';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 
 type SearchItems = RegularSearchReturn['result']['items'];
 type PartialSearchResult<ItemType extends keyof SearchItems> = Pick<
@@ -34,17 +35,18 @@ function SearchResultsArticles({
   term,
   articles,
 }: PartialSearchResult<'articles'>) {
+  const {path, t} = useI18n();
   if (!articles?.nodes.length) {
     return null;
   }
 
   return (
     <div className="search-result">
-      <h2>Articles</h2>
+      <h2>{t('search.articles')}</h2>
       <div>
         {articles?.nodes?.map((article) => {
           const articleUrl = urlWithTrackingParams({
-            baseUrl: `/blogs/${article.handle}`,
+            baseUrl: path(`/blogs/${article.handle}`),
             trackingParams: article.trackingParameters,
             term,
           });
@@ -64,17 +66,18 @@ function SearchResultsArticles({
 }
 
 function SearchResultsPages({term, pages}: PartialSearchResult<'pages'>) {
+  const {path, t} = useI18n();
   if (!pages?.nodes.length) {
     return null;
   }
 
   return (
     <div className="search-result">
-      <h2>Pages</h2>
+      <h2>{t('search.pages')}</h2>
       <div>
         {pages?.nodes?.map((page) => {
           const pageUrl = urlWithTrackingParams({
-            baseUrl: `/pages/${page.handle}`,
+            baseUrl: path(`/pages/${page.handle}`),
             trackingParams: page.trackingParameters,
             term,
           });
@@ -97,18 +100,19 @@ function SearchResultsProducts({
   term,
   products,
 }: PartialSearchResult<'products'>) {
+  const {path, t} = useI18n();
   if (!products?.nodes.length) {
     return null;
   }
 
   return (
     <div className="search-result">
-      <h2>Products</h2>
+      <h2>{t('search.products')}</h2>
       <Pagination connection={products}>
         {({nodes, isLoading, NextLink, PreviousLink}) => {
           const ItemsMarkup = nodes.map((product) => {
             const productUrl = urlWithTrackingParams({
-              baseUrl: `/products/${product.handle}`,
+              baseUrl: path(`/products/${product.handle}`),
               trackingParams: product.trackingParameters,
               term,
             });
@@ -135,7 +139,11 @@ function SearchResultsProducts({
             <div>
               <div>
                 <PreviousLink>
-                  {isLoading ? 'Loading...' : <span>↑ Load previous</span>}
+                  {isLoading ? (
+                    t('paginated.loading')
+                  ) : (
+                    <span>↑ {t('paginated.loadPrevious')}</span>
+                  )}
                 </PreviousLink>
               </div>
               <div>
@@ -144,7 +152,11 @@ function SearchResultsProducts({
               </div>
               <div>
                 <NextLink>
-                  {isLoading ? 'Loading...' : <span>Load more ↓</span>}
+                  {isLoading ? (
+                    t('paginated.loading')
+                  ) : (
+                    <span>{t('paginated.loadMore')} ↓</span>
+                  )}
                 </NextLink>
               </div>
             </div>
@@ -157,5 +169,6 @@ function SearchResultsProducts({
 }
 
 function SearchResultsEmpty() {
-  return <p>No results, try a different search.</p>;
+  const {t} = useI18n();
+  return <p>{t('search.noResultsAlt')}</p>;
 }

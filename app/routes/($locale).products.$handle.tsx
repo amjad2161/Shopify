@@ -1,5 +1,5 @@
 import {redirect, useLoaderData} from 'react-router';
-import type {Route} from './+types/products.$handle';
+import type {Route} from './+types/($locale).products.$handle';
 import {
   getSelectedProductOptions,
   Analytics,
@@ -12,15 +12,30 @@ import {ProductPrice} from '~/components/ProductPrice';
 import {ProductImage} from '~/components/ProductImage';
 import {ProductForm} from '~/components/ProductForm';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {pageTitle} from '~/lib/brand';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizePath,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data}) => {
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page =
+    data?.product.title ?? translate(locale.uiLocale, 'meta.product');
+  const handle = data?.product.handle;
   return [
-    {title: pageTitle(data?.product.title ?? 'Product')},
-    {
-      rel: 'canonical',
-      href: `/products/${data?.product.handle}`,
-    },
+    {title: localizedPageTitle(page, locale.uiLocale)},
+    ...(handle
+      ? [
+          {
+            rel: 'canonical',
+            href: localizePath(`/products/${handle}`, locale.path),
+          },
+        ]
+      : []),
   ];
 };
 
@@ -79,6 +94,7 @@ function loadDeferredData({context, params}: Route.LoaderArgs) {
 
 export default function Product() {
   const {product} = useLoaderData<typeof loader>();
+  const {t} = useI18n();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -115,7 +131,7 @@ export default function Product() {
         <br />
         <br />
         <p>
-          <strong>Description</strong>
+          <strong>{t('product.description')}</strong>
         </p>
         <br />
         <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />

@@ -7,7 +7,10 @@ import {
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
+import {LocaleSwitcher} from '~/components/LocaleSwitcher';
 import {BRAND} from '~/lib/brand';
+import {stripLocalePrefix} from '~/lib/i18n/paths';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 
 interface HeaderProps {
   header: HeaderQuery;
@@ -18,19 +21,37 @@ interface HeaderProps {
 
 type Viewport = 'desktop' | 'mobile';
 
+function resolveMenuPath(
+  itemUrl: string,
+  primaryDomainUrl: string,
+  publicStoreDomain: string,
+  path: (internalPath: string) => string,
+) {
+  const isInternal =
+    itemUrl.includes('myshopify.com') ||
+    itemUrl.includes(publicStoreDomain) ||
+    itemUrl.includes(primaryDomainUrl);
+
+  if (!isInternal) return itemUrl;
+
+  const pathname = new URL(itemUrl).pathname;
+  return path(stripLocalePrefix(pathname));
+}
+
 export function Header({
   header,
   isLoggedIn,
   cart,
   publicStoreDomain,
 }: HeaderProps) {
+  const {t, path} = useI18n();
   const {menu} = header;
   return (
     <header className="header">
-      <NavLink prefetch="intent" to="/" style={activeLinkStyle} end>
+      <NavLink prefetch="intent" to={path('/')} style={activeLinkStyle} end>
         <span className="header-brand">
           <strong className="font-display">{BRAND.name}</strong>
-          <span className="header-tagline">{BRAND.tagline}</span>
+          <span className="header-tagline">{t('brand.tagline')}</span>
         </span>
       </NavLink>
       <HeaderMenu
@@ -55,6 +76,7 @@ export function HeaderMenu({
   viewport: Viewport;
   publicStoreDomain: HeaderProps['publicStoreDomain'];
 }) {
+  const {t, path} = useI18n();
   const className = `header-menu-${viewport}`;
   const {close} = useAside();
 
@@ -66,21 +88,20 @@ export function HeaderMenu({
           onClick={close}
           prefetch="intent"
           style={activeLinkStyle}
-          to="/"
+          to={path('/')}
         >
-          Home
+          {t('nav.home')}
         </NavLink>
       )}
       {(menu || FALLBACK_HEADER_MENU).items.map((item) => {
         if (!item.url) return null;
 
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
+        const url = resolveMenuPath(
+          item.url,
+          primaryDomainUrl,
+          publicStoreDomain,
+          path,
+        );
         return (
           <NavLink
             className="header-menu-item"
@@ -103,13 +124,16 @@ function HeaderCtas({
   isLoggedIn,
   cart,
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
+  const {t, path} = useI18n();
+
   return (
     <nav className="header-ctas" role="navigation">
+      <LocaleSwitcher className="locale-switcher header-locale" />
       <HeaderMenuMobileToggle />
-      <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
-        <Suspense fallback="Sign in">
-          <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
+      <NavLink prefetch="intent" to={path('/account')} style={activeLinkStyle}>
+        <Suspense fallback={t('nav.signIn')}>
+          <Await resolve={isLoggedIn} errorElement={t('nav.signIn')}>
+            {(loggedIn) => (loggedIn ? t('nav.account') : t('nav.signIn'))}
           </Await>
         </Suspense>
       </NavLink>
@@ -132,21 +156,23 @@ function HeaderMenuMobileToggle() {
 }
 
 function SearchToggle() {
+  const {t} = useI18n();
   const {open} = useAside();
   return (
     <button className="reset" onClick={() => open('search')}>
-      Search
+      {t('nav.search')}
     </button>
   );
 }
 
 function CartBadge({count}: {count: number}) {
+  const {t, path} = useI18n();
   const {open} = useAside();
   const {publish, shop, cart, prevCart} = useAnalytics();
 
   return (
     <a
-      href="/cart"
+      href={path('/cart')}
       onClick={(e) => {
         e.preventDefault();
         open('cart');
@@ -158,7 +184,8 @@ function CartBadge({count}: {count: number}) {
         } as CartViewPayload);
       }}
     >
-      Cart <span aria-label={`(items: ${count})`}>{count}</span>
+      {t('nav.cart')}{' '}
+      <span aria-label={`(${t('nav.items', {count})})`}>{count}</span>
     </a>
   );
 }

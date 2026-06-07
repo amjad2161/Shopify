@@ -4,6 +4,7 @@ import type {
   Maybe,
   ProductOptionValueSwatch,
 } from '@shopify/hydrogen/storefront-api-types';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import type {ProductFragment} from 'storefrontapi.generated';
@@ -17,6 +18,7 @@ export function ProductForm({
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
+  const {path, t} = useI18n();
   return (
     <div className="product-form">
       {productOptions.map((option) => {
@@ -51,7 +53,7 @@ export function ProductForm({
                       prefetch="intent"
                       preventScrollReset
                       replace
-                      to={`/products/${handle}?${variantUriQuery}`}
+                      to={`${path(`/products/${handle}`)}?${variantUriQuery}`}
                       style={{
                         border: selected
                           ? '1px solid black'
@@ -118,7 +120,9 @@ export function ProductForm({
             : []
         }
       >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        {selectedVariant?.availableForSale
+          ? t('product.addToCart')
+          : t('product.soldOut')}
       </AddToCartButton>
     </div>
   );

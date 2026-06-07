@@ -1,5 +1,5 @@
 import {Link, useLoaderData} from 'react-router';
-import type {Route} from './+types/policies.$handle';
+import type {Route} from './+types/($locale).policies.$handle';
 import {type Shop} from '@shopify/hydrogen/storefront-api-types';
 
 type SelectedPolicies = keyof Pick<
@@ -7,10 +7,19 @@ type SelectedPolicies = keyof Pick<
   'privacyPolicy' | 'shippingPolicy' | 'termsOfService' | 'refundPolicy'
 >;
 
-import {pageTitle} from '~/lib/brand';
+import {
+  findLocaleByPath,
+  getDefaultLocale,
+  localizedPageTitle,
+  translate,
+  useI18n,
+} from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: pageTitle(data?.policy.title ?? 'Policy')}];
+export const meta: Route.MetaFunction = ({data, params}) => {
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+  const page =
+    data?.policy.title ?? translate(locale.uiLocale, 'meta.policy');
+  return [{title: localizedPageTitle(page, locale.uiLocale)}];
 };
 
 export async function loader({params, context}: Route.LoaderArgs) {
@@ -45,13 +54,14 @@ export async function loader({params, context}: Route.LoaderArgs) {
 
 export default function Policy() {
   const {policy} = useLoaderData<typeof loader>();
+  const {t, path} = useI18n();
 
   return (
     <div className="policy">
       <br />
       <br />
       <div>
-        <Link to="/policies">← Back to Policies</Link>
+        <Link to={path('/policies')}>{t('policies.backToAll')}</Link>
       </div>
       <br />
       <h1>{policy.title}</h1>

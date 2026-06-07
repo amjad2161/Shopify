@@ -3,6 +3,7 @@ import {Link} from 'react-router';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 import {CartLineItem, type CartLine} from '~/components/CartLineItem';
+import {useI18n} from '~/lib/i18n/I18nProvider';
 import {CartSummary} from './CartSummary';
 
 export type CartLayout = 'page' | 'aside';
@@ -37,6 +38,7 @@ function getLineItemChildrenMap(lines: CartLine[]): LineItemChildrenMap {
  * It is used by both the /cart route and the cart aside dialog.
  */
 export function CartMain({layout, cart: originalCart}: CartMainProps) {
+  const {t} = useI18n();
   // The useOptimisticCart hook applies pending actions to the cart
   // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
@@ -52,12 +54,12 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   return (
     <section
       className={className}
-      aria-label={layout === 'page' ? 'Cart page' : 'Cart drawer'}
+      aria-label={layout === 'page' ? t('cart.pageLabel') : t('cart.drawerLabel')}
     >
       <CartEmpty hidden={linesCount} layout={layout} />
       <div className="cart-details">
         <p id="cart-lines" className="sr-only">
-          Line items
+          {t('cart.lineItems')}
         </p>
         <div>
           <ul aria-labelledby="cart-lines">
@@ -93,16 +95,15 @@ function CartEmpty({
   layout?: CartMainProps['layout'];
 }) {
   const {close} = useAside();
+  const {t, path} = useI18n();
+
   return (
     <div hidden={hidden}>
       <br />
-      <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
-      </p>
+      <p>{t('cart.empty')}</p>
       <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
-        Continue shopping →
+      <Link to={path('/collections')} onClick={close} prefetch="viewport">
+        {t('cart.continueShopping')}
       </Link>
     </div>
   );
