@@ -204,6 +204,11 @@ export const he: Record<MessageKey, string> = {
 
   'home.editorial.ariaLabel': 'ערכי המותג',
 
+  'experience.rail.label': 'מוצרים מומלצים',
+  'experience.rail.eyebrow': 'גלו בסצנה',
+  'experience.focus.hint': 'גללו או הקישו על אורב אחר לחקירה. הקשה כפולה לפתיחת דף המוצר.',
+  'experience.focus.cta': 'לדף המוצר',
+
   'paginated.loadMore': 'טען עוד',
   'paginated.loadPrevious': 'טען קודמים',
   'paginated.loading': 'טוען…',

@@ -9,14 +9,15 @@ import {useSceneStore} from '~/stores/useSceneStore';
 type ProductOrbProps = {
   product: SceneProduct;
   index: number;
-  onSelect: (handle: string) => void;
+  onFocus: (handle: string, index: number) => void;
+  onOpen: (handle: string) => void;
 };
 
 type ProductOrbCoreProps = ProductOrbProps & {
   map: Texture | null;
 };
 
-function ProductOrbCore({product, index, onSelect, map}: ProductOrbCoreProps) {
+function ProductOrbCore({product, index, onFocus, onOpen, map}: ProductOrbCoreProps) {
   const groupRef = useRef<Group>(null);
   const meshRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -65,7 +66,11 @@ function ProductOrbCore({product, index, onSelect, map}: ProductOrbCoreProps) {
         position={product.position}
         onClick={(event) => {
           event.stopPropagation();
-          onSelect(product.handle);
+          onFocus(product.handle, index);
+        }}
+        onDoubleClick={(event) => {
+          event.stopPropagation();
+          onOpen(product.handle);
         }}
         onPointerOver={(event) => {
           event.stopPropagation();

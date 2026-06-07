@@ -51,7 +51,7 @@ export function resolveBrandUrl(env: BrandEnv) {
   return undefined;
 }
 
-/** Page title for document head — e.g. "Gray Runners | Lumen Atelier" */
+/** Page title for document head — e.g. "Collection | OneClick Hub" */
 export function pageTitle(page?: string) {
   return page ? `${page} | ${BRAND.name}` : `${BRAND.name} — ${BRAND.tagline}`;
 }

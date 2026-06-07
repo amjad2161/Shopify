@@ -4,19 +4,24 @@ import {isLowStock} from '~/lib/three/map-products';
 import {BRAND} from '~/lib/brand';
 import {useSceneStore} from '~/stores/useSceneStore';
 import {useI18n} from '~/lib/i18n/I18nProvider';
+import {ExperienceProductRail} from '~/components/experience/ExperienceProductRail';
+import {useExperienceFocusAnimation} from '~/hooks/useExperienceFocusAnimation';
 
 type ExperienceOverlayProps = {
   products: SceneProduct[];
   collectionHandle?: string;
+  onFocusIndex: (index: number) => void;
 };
 
 export function ExperienceOverlay({
   products,
   collectionHandle = 'all',
+  onFocusIndex,
 }: ExperienceOverlayProps) {
   const {t, path} = useI18n();
   const activeIndex = useSceneStore((s) => s.activeIndex);
   const focus = products[activeIndex] ?? products[0];
+  const focusPanelRef = useExperienceFocusAnimation(activeIndex);
 
   return (
     <div className="experience-overlay">
@@ -26,8 +31,17 @@ export function ExperienceOverlay({
         <p className="experience-tagline">{t('brand.tagline')}</p>
       </header>
 
+      <ExperienceProductRail
+        products={products}
+        onFocusIndex={onFocusIndex}
+      />
+
       {focus ? (
-        <aside className="experience-focus" aria-live="polite">
+        <aside
+          ref={focusPanelRef}
+          className="experience-focus"
+          aria-live="polite"
+        >
           <p className="experience-focus-label">{t('home.recommended.eyebrow')}</p>
           <h2 className="experience-focus-title font-display">{focus.title}</h2>
           {focus.priceLabel ? (
@@ -38,11 +52,12 @@ export function ExperienceOverlay({
               {t('product.lowStock', {count: focus.totalInventory ?? 0})}
             </p>
           ) : null}
+          <p className="experience-focus-hint">{t('experience.focus.hint')}</p>
           <Link
             className="experience-cta"
             to={path(`/products/${focus.handle}`)}
           >
-            {t('home.featured.explore')}
+            {t('experience.focus.cta')}
           </Link>
         </aside>
       ) : null}

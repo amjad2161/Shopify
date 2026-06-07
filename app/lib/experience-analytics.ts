@@ -1,5 +1,6 @@
 export type ExperienceAnalyticsEvent =
   | '3d_orb_click'
+  | '3d_orb_focus'
   | '3d_scroll_depth'
   | '3d_fallback'
   | '3d_webgl_error'

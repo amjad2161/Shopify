@@ -11,14 +11,16 @@ import {useSceneStore} from '~/stores/useSceneStore';
 type ProductModelProps = {
   product: SceneProduct;
   index: number;
-  onSelect: (handle: string) => void;
+  onFocus: (handle: string, index: number) => void;
+  onOpen: (handle: string) => void;
   onFailed?: () => void;
 };
 
 function ProductModelMesh({
   product,
   index,
-  onSelect,
+  onFocus,
+  onOpen,
 }: Omit<ProductModelProps, 'onFailed'>) {
   ensureDracoDecoder();
   const {scene} = useGLTF(product.modelUrl!);
@@ -64,7 +66,11 @@ function ProductModelMesh({
         position={product.position}
         onClick={(event) => {
           event.stopPropagation();
-          onSelect(product.handle);
+          onFocus(product.handle, index);
+        }}
+        onDoubleClick={(event) => {
+          event.stopPropagation();
+          onOpen(product.handle);
         }}
         onPointerOver={(event) => {
           event.stopPropagation();

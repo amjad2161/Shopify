@@ -1,9 +1,11 @@
-import {useEffect, useRef} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 import gsap from 'gsap';
 import {ScrollTrigger} from 'gsap/ScrollTrigger';
 import {useGSAP} from '@gsap/react';
 import {
+  scrollProgressForIndex,
   scrollProgressFromElement,
+  scrollRootToProgress,
   syncScrollToScene,
   type ScrollProduct,
 } from '~/lib/experience-scroll';
@@ -72,5 +74,32 @@ export function useGsapExperience(products: ScrollProduct[]) {
     setScrollProgress,
   ]);
 
-  return rootRef;
+  const focusAtIndex = useCallback(
+    (index: number) => {
+      const root = rootRef.current;
+      if (!root || productCount === 0) return;
+
+      const progress = scrollProgressForIndex(index, productCount);
+      const behavior: ScrollBehavior = reducedMotion ? 'auto' : 'smooth';
+      scrollRootToProgress(root, progress, behavior);
+
+      if (reducedMotion) {
+        syncScrollToScene(progress, products, {
+          setScrollProgress,
+          setActiveIndex,
+          setFocus,
+        });
+      }
+    },
+    [
+      productCount,
+      products,
+      reducedMotion,
+      setActiveIndex,
+      setFocus,
+      setScrollProgress,
+    ],
+  );
+
+  return {scrollRef: rootRef, focusAtIndex};
 }

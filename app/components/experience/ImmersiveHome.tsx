@@ -44,7 +44,7 @@ export function ImmersiveHome({
   const {path} = useI18n();
   const {publish} = useAnalytics();
   const sceneProducts = mapProductsToScene(products);
-  const scrollRef = useGsapExperience(sceneProducts);
+  const {scrollRef, focusAtIndex} = useGsapExperience(sceneProducts);
   const {checked, supported} = useWebGLSupport();
   const [runtimeFallback, setRuntimeFallback] = useState(false);
 
@@ -65,7 +65,14 @@ export function ImmersiveHome({
     }
   }, [sceneProducts]);
 
-  const onProductSelect = useCallback(
+  const onProductFocus = useCallback(
+    (_handle: string, index: number) => {
+      focusAtIndex(index);
+    },
+    [focusAtIndex],
+  );
+
+  const onProductOpen = useCallback(
     (handle: string) => {
       void navigate(path(`/products/${handle}`));
     },
@@ -105,7 +112,8 @@ export function ImmersiveHome({
             <Suspense fallback={<div className="experience-canvas-fallback" />}>
               <SceneCanvas
                 products={sceneProducts}
-                onProductSelect={onProductSelect}
+                onProductFocus={onProductFocus}
+                onProductOpen={onProductOpen}
               />
             </Suspense>
           </ExperienceErrorBoundary>
@@ -117,6 +125,7 @@ export function ImmersiveHome({
         <ExperienceOverlay
           products={sceneProducts}
           collectionHandle={collectionHandle}
+          onFocusIndex={focusAtIndex}
         />
         <div className="experience-scroll-spacer experience-scroll-spacer--tail" />
       </div>

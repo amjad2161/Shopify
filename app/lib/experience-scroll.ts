@@ -69,6 +69,35 @@ export function cameraPositionForScroll(
   };
 }
 
+/** Scroll progress that centers the viewport on a product segment (0–1). */
+export function scrollProgressForIndex(
+  index: number,
+  productCount: number,
+): number {
+  if (productCount <= 0) return 0;
+  if (productCount === 1) return 0;
+  const clamped = Math.min(productCount - 1, Math.max(0, index));
+  return Math.min(1, (clamped + 0.5) / productCount);
+}
+
+/** Scroll the immersive root so ScrollTrigger progress matches `progress`. */
+export function scrollRootToProgress(
+  root: HTMLElement,
+  progress: number,
+  behavior: ScrollBehavior = 'smooth',
+): void {
+  const viewportHeight =
+    typeof window !== 'undefined' ? window.innerHeight : 800;
+  const scrollable = root.offsetHeight - viewportHeight;
+  if (scrollable <= 0) return;
+
+  const rootTop = root.getBoundingClientRect().top + window.scrollY;
+  const clamped = Math.min(1, Math.max(0, progress));
+  const target = rootTop + clamped * scrollable;
+
+  window.scrollTo({top: target, behavior});
+}
+
 /** Static orb / model pose when motion is reduced — no time-based animation. */
 export function staticOrbTransform(
   index: number,

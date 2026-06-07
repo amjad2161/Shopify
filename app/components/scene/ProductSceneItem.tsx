@@ -6,7 +6,8 @@ import {ProductOrb} from '~/components/scene/ProductOrb';
 type ProductSceneItemProps = {
   product: SceneProduct;
   index: number;
-  onSelect: (handle: string) => void;
+  onFocus: (handle: string, index: number) => void;
+  onOpen: (handle: string) => void;
 };
 
 /** Renders a GLB when available; falls back to the procedural orb on load failure. */

@@ -204,6 +204,11 @@ export const en = {
 
   'home.editorial.ariaLabel': 'Brand values',
 
+  'experience.rail.label': 'Featured products',
+  'experience.rail.eyebrow': 'Browse the scene',
+  'experience.focus.hint': 'Scroll or tap another orb to explore. Double-tap to open the product page.',
+  'experience.focus.cta': 'View product',
+
   'paginated.loadMore': 'Load more',
   'paginated.loadPrevious': 'Load previous',
   'paginated.loading': 'Loading…',

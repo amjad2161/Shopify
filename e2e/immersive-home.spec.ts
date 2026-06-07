@@ -42,6 +42,7 @@ test.describe('Immersive homepage', () => {
 
     await expect(page.locator('.experience-overlay')).toBeVisible();
     await expect(page.locator('.experience-title, .experience-cta')).toBeVisible();
+    await expect(page.locator('.experience-focus-hint')).toBeVisible();
   });
 
   test('product pages render the PDP media region', async ({page}) => {

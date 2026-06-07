@@ -13,18 +13,20 @@ import {useSceneStore} from '~/stores/useSceneStore';
 
 type SceneCanvasProps = {
   products: SceneProduct[];
-  onProductSelect: (handle: string) => void;
+  onProductFocus: (handle: string, index: number) => void;
+  onProductOpen: (handle: string) => void;
 };
 
 function SceneContent({
   products,
-  onProductSelect,
+  onProductFocus,
+  onProductOpen,
 }: SceneCanvasProps) {
   const {publish} = useAnalytics();
   const setFocus = useSceneStore((s) => s.setFocus);
 
-  const handleSelect = useCallback(
-    (handle: string) => {
+  const handleFocus = useCallback(
+    (handle: string, index: number) => {
       const product = products.find((item) => item.handle === handle);
       if (product) {
         setFocus({
@@ -33,13 +35,24 @@ function SceneContent({
           title: product.title,
         });
         publishExperienceEvent(publish, {
-          event: '3d_orb_click',
+          event: '3d_orb_focus',
           handle: product.handle,
         });
       }
-      onProductSelect(handle);
+      onProductFocus(handle, index);
     },
-    [onProductSelect, products, publish, setFocus],
+    [onProductFocus, products, publish, setFocus],
+  );
+
+  const handleOpen = useCallback(
+    (handle: string) => {
+      publishExperienceEvent(publish, {
+        event: '3d_orb_click',
+        handle,
+      });
+      onProductOpen(handle);
+    },
+    [onProductOpen, publish],
   );
 
   return (
@@ -51,14 +64,15 @@ function SceneContent({
           key={product.id}
           product={product}
           index={index}
-          onSelect={handleSelect}
+          onFocus={handleFocus}
+          onOpen={handleOpen}
         />
       ))}
     </>
   );
 }
 
-export function SceneCanvas({products, onProductSelect}: SceneCanvasProps) {
+export function SceneCanvas({products, onProductFocus, onProductOpen}: SceneCanvasProps) {
   const dpr = useCanvasDpr();
   const isMobile = useSceneStore((s) => s.isMobile);
 
@@ -81,7 +95,11 @@ export function SceneCanvas({products, onProductSelect}: SceneCanvasProps) {
       }}
     >
       <Suspense fallback={null}>
-        <SceneContent products={products} onProductSelect={onProductSelect} />
+        <SceneContent
+          products={products}
+          onProductFocus={onProductFocus}
+          onProductOpen={onProductOpen}
+        />
       </Suspense>
     </Canvas>
   );

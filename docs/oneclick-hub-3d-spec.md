@@ -39,7 +39,8 @@ app/
   components/
     experience/
       ImmersiveHome.tsx           # אורקסטרציה
-      ExperienceOverlay.tsx       # UI שקוף + מלאי נמוך
+      ExperienceOverlay.tsx       # UI שקוף + מלאי נמוך + רייל מוצרים
+      ExperienceProductRail.tsx   # רייל תמונות ממוזערות
       ExperienceErrorBoundary.tsx # נפילה מ-WebGL/R3F
     home/ClassicHomepage.tsx      # fallback דו-ממדי
     product/
@@ -53,7 +54,8 @@ app/
       ProductSceneItem.tsx
       CameraRig.tsx
   hooks/
-    useGsapExperience.ts
+    useGsapExperience.ts          # scrollRef + focusAtIndex
+    useExperienceFocusAnimation.ts
     useDevice3dProfile.ts
     useWebGLSupport.ts
     useAnnouncementOffset.ts
@@ -67,6 +69,7 @@ app/
       image-url.ts
       load-glb.ts
     experience-analytics.ts
+    experience-scroll.ts            # scrollProgressForIndex, scrollRootToProgress
   stores/useSceneStore.ts
   styles/experience.css
 e2e/immersive-home.spec.ts
@@ -82,11 +85,13 @@ e2e/immersive-home.spec.ts
 ## אינטראקציה
 
 1. גלילה מזיזה את המצלמה/סיבוב האורבים (דרך `scrollProgress` + `setFocus`)
-2. לחיצה על אורב/מודל → אנליטיקה `3d_orb_click` + ניווט ל-PDP
-3. פאנל מוצר פעיל עם i18n (en/he/fr) + תווית מלאי נמוך אמיתית
-4. `prefers-reduced-motion` מכבה אנימציות GSAP/Float אך שומר סנכרון גלילה (native scroll → `syncScrollToScene`) ומיקום מצלמה סטטי
-5. announcement bar נעלם בעדינות אחרי תחילת גלילה (immersive בלבד)
-6. PDP: `ProductViewer3d` עם OrbitControls כשיש GLB + WebGL
+2. **לחיצה בודדת** על אורב/מודל → `3d_orb_focus` + מיקוד + גלילה לסגמנט המוצר (`focusAtIndex`)
+3. **לחיצה כפולה** על אורב/מודל → `3d_orb_click` + ניווט ל-PDP
+4. **רייל מוצרים** (`ExperienceProductRail`) — קפיצה למוצר בגלילה; מוסתר כשיש מוצר יחיד
+5. פאנל מוצר פעיל עם i18n (en/he/fr), רמז אינטראקציה, CTA ל-PDP + תווית מלאי נמוך אמיתית
+6. `prefers-reduced-motion` מכבה אנימציות GSAP/Float אך שומר סנכרון גלילה (native scroll → `syncScrollToScene`) ומיקום מצלמה סטטי
+7. announcement bar נעלם בעדינות אחרי תחילת גלילה (immersive בלבד)
+8. PDP: `ProductViewer3d` עם OrbitControls כשיש GLB + WebGL
 
 ## ביצועים ואופטימיזציה
 
@@ -108,7 +113,8 @@ e2e/immersive-home.spec.ts
 
 אירועים מפורסמים דרך `publishExperienceEvent` → `custom_3d_experience`:
 
-- `3d_orb_click` — לחיצה על אורב/מודל
+- `3d_orb_focus` — מיקוד על אורב/מודל (לחיצה בודדת)
+- `3d_orb_click` — פתיחת PDP (לחיצה כפולה)
 - `3d_scroll_depth` — דלי עומק גלילה (0–10)
 - `3d_fallback` — נפילה ל-2D
 - `3d_webgl_error` — שגיאת WebGL/R3F

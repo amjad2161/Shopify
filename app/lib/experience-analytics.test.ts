@@ -28,4 +28,17 @@ describe('publishExperienceEvent', () => {
       }),
     );
   });
+
+  it('publishes focus events for single-click orb interaction', () => {
+    const publish = vi.fn();
+    publishExperienceEvent(publish, {event: '3d_orb_focus', handle: 'orb-lamp'});
+
+    expect(publish).toHaveBeenCalledWith(
+      'custom_3d_experience',
+      expect.objectContaining({
+        event: '3d_orb_focus',
+        handle: 'orb-lamp',
+      }),
+    );
+  });
 });

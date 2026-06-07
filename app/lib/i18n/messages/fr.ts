@@ -207,6 +207,12 @@ export const fr: Record<MessageKey, string> = {
 
   'home.editorial.ariaLabel': 'Nos engagements',
 
+  'experience.rail.label': 'Produits en vedette',
+  'experience.rail.eyebrow': 'Parcourir la scène',
+  'experience.focus.hint':
+    'Faites défiler ou touchez une autre sphère pour explorer. Double-tapez pour ouvrir la fiche produit.',
+  'experience.focus.cta': 'Voir le produit',
+
   'paginated.loadMore': 'Charger plus',
   'paginated.loadPrevious': 'Charger les précédents',
   'paginated.loading': 'Chargement…',
