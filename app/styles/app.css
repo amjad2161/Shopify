@@ -814,6 +814,37 @@ button.reset:hover:not(:has(> *)) {
   top: 6rem;
 }
 
+.product-low-stock {
+  margin: 0.35rem 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #9a5b14;
+}
+
+.add-to-cart--pulse {
+  animation: add-to-cart-pulse 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes add-to-cart-pulse {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 4px rgba(184, 134, 11, 0.25);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .add-to-cart--pulse {
+    animation: none;
+  }
+}
+
 .product-price-on-sale {
   display: flex;
   grid-gap: 0.5rem;

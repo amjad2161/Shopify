@@ -118,6 +118,7 @@ export const fr: Record<MessageKey, string> = {
 
   'product.addToCart': 'Ajouter au panier',
   'product.description': 'Description',
+  'product.lowStock': 'Plus que {count} en stock',
   'product.soldOut': 'Épuisé',
   'product.unavailable': 'Indisponible',
 

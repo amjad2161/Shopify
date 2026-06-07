@@ -15,6 +15,9 @@ import {CartMain} from '~/components/CartMain';
 import {SearchFormPredictive} from '~/components/SearchFormPredictive';
 import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
 import {useI18n} from '~/lib/i18n/I18nProvider';
+import {useAnnouncementOffset} from '~/hooks/useAnnouncementOffset';
+import {usePageTransition} from '~/hooks/usePageTransition';
+import {useWebVitals} from '~/hooks/useWebVitals';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -35,8 +38,13 @@ export function PageLayout({
 }: PageLayoutProps) {
   const location = useLocation();
   const root = useRouteLoaderData<RootLoader>('root');
+  const immersive3dEnabled = Boolean(root?.immersive3dEnabled);
   const immersiveHome =
-    Boolean(root?.immersive3dEnabled) && isImmersiveHomePath(location.pathname);
+    immersive3dEnabled && isImmersiveHomePath(location.pathname);
+
+  useAnnouncementOffset(immersiveHome);
+  usePageTransition(immersive3dEnabled);
+  useWebVitals(immersive3dEnabled, immersiveHome ? '3d' : 'classic');
 
   return (
     <Aside.Provider>

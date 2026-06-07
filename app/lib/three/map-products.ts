@@ -1,9 +1,14 @@
+import {optimizeShopifyImageUrl} from '~/lib/three/image-url';
+import {pickModel3dSource} from '~/lib/three/load-glb';
+
 export type SceneProduct = {
   id: string;
   handle: string;
   title: string;
   imageUrl?: string;
+  modelUrl?: string;
   priceLabel?: string;
+  totalInventory?: number | null;
   /** Orbit position in world space */
   position: [number, number, number];
   /** Pixar-style accent hue 0–1 */
@@ -19,13 +24,52 @@ function orbitPosition(index: number, total: number): [number, number, number] {
   return [Math.cos(angle) * radius, y, Math.sin(angle) * radius - 1.2];
 }
 
-export function mapProductsToScene<T extends {
+type ModelMediaNode = {
+  __typename?: string;
+  sources?: Array<{
+    url?: string | null;
+    format?: string | null;
+    mimeType?: string | null;
+  }> | null;
+};
+
+type MappableProduct = {
   id: string;
   handle: string;
   title: string;
   featuredImage?: {url?: string | null} | null;
   priceRange?: {minVariantPrice?: {amount?: string; currencyCode?: string}};
-}>(products: T[]): SceneProduct[] {
+  totalInventory?: number | null;
+  media?: {nodes?: Array<ModelMediaNode | null> | null} | null;
+  model3dMetafield?: {
+    reference?: {url?: string | null} | null;
+  } | null;
+};
+
+/** Ethical low-stock badge: only when Shopify reports 1–5 units left. */
+export function isLowStock(totalInventory: number | null | undefined): boolean {
+  if (totalInventory == null) return false;
+  return totalInventory >= 1 && totalInventory <= 5;
+}
+
+/** Resolve a GLB/GLTF URL from product media or custom metafield. */
+export function resolveProductModelUrl(
+  product: MappableProduct,
+): string | undefined {
+  for (const node of product.media?.nodes ?? []) {
+    const picked = pickModel3dSource(node?.sources ?? undefined);
+    if (picked?.url) return picked.url;
+  }
+
+  const metafieldUrl = product.model3dMetafield?.reference?.url;
+  if (metafieldUrl) return metafieldUrl;
+
+  return undefined;
+}
+
+export function mapProductsToScene<T extends MappableProduct>(
+  products: T[],
+): SceneProduct[] {
   return products.slice(0, 8).map((product, index) => {
     const amount = product.priceRange?.minVariantPrice?.amount;
     const currency = product.priceRange?.minVariantPrice?.currencyCode ?? '';
@@ -36,10 +80,17 @@ export function mapProductsToScene<T extends {
       id: product.id,
       handle: product.handle,
       title: product.title,
-      imageUrl: product.featuredImage?.url ?? undefined,
+      imageUrl: optimizeShopifyImageUrl(product.featuredImage?.url, 512),
+      modelUrl: resolveProductModelUrl(product),
       priceLabel,
+      totalInventory: product.totalInventory ?? null,
       position: orbitPosition(index, products.length),
       hue: HUES[index % HUES.length] ?? 0.5,
     };
   });
+}
+
+/** Products that should preload GLB assets (first visible set). */
+export function sceneProductsWithModels(products: SceneProduct[]): SceneProduct[] {
+  return products.filter((p) => Boolean(p.modelUrl));
 }

@@ -6,14 +6,22 @@ import {useSceneStore} from '~/stores/useSceneStore';
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+type ScrollProduct = {
+  id: string;
+  handle: string;
+  title: string;
+};
+
 /**
  * Syncs scroll position with the global scene store for 3D choreography.
  */
-export function useGsapExperience(productCount: number) {
+export function useGsapExperience(products: ScrollProduct[]) {
   const rootRef = useRef<HTMLDivElement>(null);
   const setScrollProgress = useSceneStore((s) => s.setScrollProgress);
   const setActiveIndex = useSceneStore((s) => s.setActiveIndex);
+  const setFocus = useSceneStore((s) => s.setFocus);
   const reducedMotion = useSceneStore((s) => s.reducedMotion);
+  const productCount = products.length;
 
   useGSAP(
     () => {
@@ -31,10 +39,18 @@ export function useGsapExperience(productCount: number) {
             Math.floor(self.progress * productCount),
           );
           setActiveIndex(index);
+          const product = products[index];
+          if (product) {
+            setFocus({
+              id: product.id,
+              handle: product.handle,
+              title: product.title,
+            });
+          }
         },
       });
     },
-    {scope: rootRef, dependencies: [productCount, reducedMotion]},
+    {scope: rootRef, dependencies: [productCount, products, reducedMotion]},
   );
 
   return rootRef;

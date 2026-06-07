@@ -1,10 +1,15 @@
-import {Suspense} from 'react';
+import {Suspense, useCallback, useEffect} from 'react';
 import {Canvas} from '@react-three/fiber';
-import {Preload} from '@react-three/drei';
+import {useAnalytics} from '@shopify/hydrogen';
 import type {SceneProduct} from '~/lib/three/map-products';
+import {sceneProductsWithModels} from '~/lib/three/map-products';
+import {preloadGlb} from '~/lib/three/load-glb';
+import {publishExperienceEvent} from '~/lib/experience-analytics';
 import {StudioStage} from '~/components/scene/StudioStage';
-import {ProductOrb} from '~/components/scene/ProductOrb';
+import {ProductSceneItem} from '~/components/scene/ProductSceneItem';
+import {CameraRig} from '~/components/scene/CameraRig';
 import {useCanvasDpr} from '~/hooks/useDevice3dProfile';
+import {useSceneStore} from '~/stores/useSceneStore';
 
 type SceneCanvasProps = {
   products: SceneProduct[];
@@ -15,24 +20,52 @@ function SceneContent({
   products,
   onProductSelect,
 }: SceneCanvasProps) {
+  const {publish} = useAnalytics();
+  const setFocus = useSceneStore((s) => s.setFocus);
+
+  const handleSelect = useCallback(
+    (handle: string) => {
+      const product = products.find((item) => item.handle === handle);
+      if (product) {
+        setFocus({
+          id: product.id,
+          handle: product.handle,
+          title: product.title,
+        });
+        publishExperienceEvent(publish, {
+          event: '3d_orb_click',
+          handle: product.handle,
+        });
+      }
+      onProductSelect(handle);
+    },
+    [onProductSelect, products, publish, setFocus],
+  );
+
   return (
     <>
+      <CameraRig />
       <StudioStage />
       {products.map((product, index) => (
-        <ProductOrb
+        <ProductSceneItem
           key={product.id}
           product={product}
           index={index}
-          onSelect={onProductSelect}
+          onSelect={handleSelect}
         />
       ))}
-      <Preload all />
     </>
   );
 }
 
 export function SceneCanvas({products, onProductSelect}: SceneCanvasProps) {
   const dpr = useCanvasDpr();
+
+  useEffect(() => {
+    for (const product of sceneProductsWithModels(products)) {
+      if (product.modelUrl) preloadGlb(product.modelUrl);
+    }
+  }, [products]);
 
   return (
     <Canvas

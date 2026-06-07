@@ -14,3 +14,4 @@ node_modules
 !.automation/reports/.gitkeep
 .catalog/reports/*
 !.catalog/reports/.gitkeep
+test-results/

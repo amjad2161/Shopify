@@ -1,5 +1,6 @@
 import {Link} from 'react-router';
 import type {SceneProduct} from '~/lib/three/map-products';
+import {isLowStock} from '~/lib/three/map-products';
 import {BRAND} from '~/lib/brand';
 import {useSceneStore} from '~/stores/useSceneStore';
 import {useI18n} from '~/lib/i18n/I18nProvider';
@@ -31,6 +32,11 @@ export function ExperienceOverlay({
           <h2 className="experience-focus-title font-display">{focus.title}</h2>
           {focus.priceLabel ? (
             <p className="experience-focus-price">{focus.priceLabel}</p>
+          ) : null}
+          {isLowStock(focus.totalInventory) ? (
+            <p className="experience-focus-stock" role="status">
+              {t('product.lowStock', {count: focus.totalInventory ?? 0})}
+            </p>
           ) : null}
           <Link
             className="experience-cta"
