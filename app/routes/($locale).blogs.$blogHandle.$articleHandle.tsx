@@ -2,6 +2,7 @@ import {useLoaderData} from 'react-router';
 import type {Route} from './+types/($locale).blogs.$blogHandle.$articleHandle';
 import {Image} from '@shopify/hydrogen';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {sanitizeProductHtml} from '~/lib/sanitize-html';
 
 import {
   findLocaleByPath,
@@ -101,7 +102,7 @@ export default function Article() {
 
       {image && <Image data={image} sizes="90vw" loading="eager" />}
       <div
-        dangerouslySetInnerHTML={{__html: contentHtml}}
+        dangerouslySetInnerHTML={{__html: sanitizeProductHtml(contentHtml)}}
         className="article"
       />
     </div>

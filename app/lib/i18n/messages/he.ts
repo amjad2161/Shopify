@@ -64,6 +64,18 @@ export const he: Record<MessageKey, string> = {
     'לא הצלחנו להוסיף את הדוא״ל כרגע. נסו שוב בקרוב.',
   'newsletter.serverError':
     'לא הצלחנו לעבד את ההרשמה. נסו שוב בקרוב.',
+  'newsletter.rateLimited':
+    'יותר מדי ניסיונות הרשמה מהדפדפן הזה. נסו שוב בעוד כשעה.',
+
+  'a11y.skipToContent': 'דילוג לתוכן הראשי',
+
+  'ageGate.eyebrow': 'אימות גיל',
+  'ageGate.title': 'אשרו שאתם בני 18 ומעלה',
+  'ageGate.body':
+    'חלק מהמוצרים בחנות מיועדים למבוגרים. אשרו את גילכם כדי להמשיך.',
+  'ageGate.confirm': 'אני בן/בת 18 ומעלה',
+  'ageGate.decline': 'חזרה לחנות',
+  'ageGate.mustConfirm': 'יש לאשר שאתם בני 18 ומעלה כדי להמשיך.',
 
   'cart.pageLabel': 'דף עגלה',
   'cart.drawerLabel': 'מגירת עגלה',

@@ -63,6 +63,18 @@ export const en = {
     'We could not add that email right now. Please try again shortly.',
   'newsletter.serverError':
     'We could not process your subscription. Please try again shortly.',
+  'newsletter.rateLimited':
+    'Too many signup attempts from this browser. Please try again in about an hour.',
+
+  'a11y.skipToContent': 'Skip to main content',
+
+  'ageGate.eyebrow': 'Age verification',
+  'ageGate.title': 'Confirm you are 18 or older',
+  'ageGate.body':
+    'Some products in this store are intended for adults. Confirm your age to continue.',
+  'ageGate.confirm': 'I am 18 or older',
+  'ageGate.decline': 'Return to the storefront',
+  'ageGate.mustConfirm': 'You must confirm you are 18 or older to continue.',
 
   'cart.pageLabel': 'Cart page',
   'cart.drawerLabel': 'Cart drawer',

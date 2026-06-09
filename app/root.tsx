@@ -20,6 +20,7 @@ import tailwindCss from './styles/tailwind.css?url';
 import {isImmersive3dEnabled} from '~/lib/experience';
 import type {StoreEnvRecord} from '~/lib/store-env';
 import {PageLayout} from './components/PageLayout';
+import {isAgeVerified} from '~/lib/age-gate';
 import {BRAND, resolveBrand, resolveBrandUrl} from '~/lib/brand';
 import {I18nProvider} from '~/lib/i18n/I18nProvider';
 import {resolveLocaleFromRequest, translate} from '~/lib/i18n';
@@ -82,6 +83,7 @@ export function links() {
       href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap',
     },
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {rel: 'manifest', href: '/manifest.webmanifest'},
     {rel: 'stylesheet', href: experienceStyles},
   ];
 }
@@ -102,6 +104,7 @@ export async function loader(args: Route.LoaderArgs) {
     locale,
     brand: resolveBrand(env),
     brandUrl: resolveBrandUrl(env),
+    ageVerified: isAgeVerified(args.context.session),
     immersive3dEnabled: isImmersive3dEnabled(env as unknown as StoreEnvRecord),
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
@@ -111,7 +114,7 @@ export async function loader(args: Route.LoaderArgs) {
     consent: {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
-      withPrivacyBanner: false,
+      withPrivacyBanner: true,
       // localize the privacy banner
       country: args.context.storefront.i18n.country,
       language: args.context.storefront.i18n.language,

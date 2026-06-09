@@ -1,5 +1,6 @@
 import {data} from 'react-router';
 import type {Route} from './+types/($locale).newsletter';
+import {consumeNewsletterAttempt} from '~/lib/newsletter-rate-limit';
 import {findLocaleByStorefrontI18n, translate} from '~/lib/i18n';
 
 const CUSTOMER_CREATE_MUTATION = `#graphql
@@ -61,6 +62,16 @@ export async function action({request, context}: Route.ActionArgs) {
         error: translate(uiLocale, 'newsletter.invalidEmail'),
       },
       {status: 400},
+    );
+  }
+
+  if (!consumeNewsletterAttempt(context.session)) {
+    return data(
+      {
+        ok: false as const,
+        error: translate(uiLocale, 'newsletter.rateLimited'),
+      },
+      {status: 429},
     );
   }
 

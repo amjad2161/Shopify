@@ -65,6 +65,19 @@ export const fr: Record<MessageKey, string> = {
     'Nous n’avons pas pu ajouter ce courriel pour le moment. Veuillez réessayer sous peu.',
   'newsletter.serverError':
     'Nous n’avons pas pu traiter votre inscription. Veuillez réessayer sous peu.',
+  'newsletter.rateLimited':
+    'Trop de tentatives d’inscription depuis ce navigateur. Réessayez dans environ une heure.',
+
+  'a11y.skipToContent': 'Aller au contenu principal',
+
+  'ageGate.eyebrow': 'Vérification d’âge',
+  'ageGate.title': 'Confirmez avoir 18 ans ou plus',
+  'ageGate.body':
+    'Certains produits de cette boutique sont réservés aux adultes. Confirmez votre âge pour continuer.',
+  'ageGate.confirm': 'J’ai 18 ans ou plus',
+  'ageGate.decline': 'Retour à la boutique',
+  'ageGate.mustConfirm':
+    'Vous devez confirmer avoir 18 ans ou plus pour continuer.',
 
   'cart.pageLabel': 'Page panier',
   'cart.drawerLabel': 'Tiroir panier',

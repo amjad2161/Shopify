@@ -7,6 +7,7 @@ type SelectedPolicies = keyof Pick<
   'privacyPolicy' | 'shippingPolicy' | 'termsOfService' | 'refundPolicy'
 >;
 
+import {sanitizeProductHtml} from '~/lib/sanitize-html';
 import {
   findLocaleByPath,
   getDefaultLocale,
@@ -67,7 +68,9 @@ export default function Policy() {
       </div>
       <br />
       <h1>{policy.title}</h1>
-      <div dangerouslySetInnerHTML={{__html: policy.body}} />
+      <div
+        dangerouslySetInnerHTML={{__html: sanitizeProductHtml(policy.body)}}
+      />
     </div>
   );
 }

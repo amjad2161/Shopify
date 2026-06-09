@@ -1,4 +1,4 @@
-import {redirect, useLoaderData} from 'react-router';
+import {redirect, useLoaderData, useRouteLoaderData, type MetaDescriptor} from 'react-router';
 import type {Route} from './+types/($locale).products.$handle';
 import {
   getSelectedProductOptions,
@@ -17,6 +17,13 @@ import {
 } from '~/lib/three/map-products';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {
+  isAgeVerified,
+  productRequiresAgeGate,
+} from '~/lib/age-gate';
+import {resolveBrand, resolveBrandUrl} from '~/lib/brand';
+import {productJsonLd} from '~/lib/product-json-ld';
+import {sanitizeProductHtml} from '~/lib/sanitize-html';
+import {
   findLocaleByPath,
   getDefaultLocale,
   localizePath,
@@ -25,24 +32,50 @@ import {
   translate,
   useI18n,
 } from '~/lib/i18n';
+import type {RootLoader} from '~/root';
 
 export const meta: Route.MetaFunction = ({data, params, matches}) => {
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
-  const page =
-    data?.product.title ?? translate(locale.uiLocale, 'meta.product');
-  const handle = data?.product.handle;
-  const brandName = brandNameFromMatches(matches);
-  return [
-    {title: localizedPageTitle(page, locale.uiLocale, brandName)},
-    ...(handle
-      ? [
-          {
-            rel: 'canonical',
-            href: localizePath(`/products/${handle}`, locale.path),
-          },
-        ]
-      : []),
+  const product = data?.product;
+  const page = product?.title ?? translate(locale.uiLocale, 'meta.product');
+  const handle = product?.handle;
+  const brandName = data?.brand?.name ?? brandNameFromMatches(matches);
+  const title = localizedPageTitle(page, locale.uiLocale, brandName);
+  const description =
+    product?.seo?.description?.trim() ||
+    product?.description?.trim() ||
+    translate(locale.uiLocale, 'brand.description');
+  const image = product?.selectedOrFirstAvailableVariant?.image?.url;
+  const productPath = handle
+    ? localizePath(`/products/${handle}`, locale.path)
+    : undefined;
+  const canonicalUrl =
+    data?.brandUrl && productPath
+      ? `${data.brandUrl}${productPath}`
+      : productPath;
+
+  const tags: MetaDescriptor[] = [
+    {title},
+    {name: 'description', content: description},
+    {property: 'og:title', content: title},
+    {property: 'og:description', content: description},
+    {property: 'og:type', content: 'product'},
+    {name: 'twitter:card', content: 'summary_large_image'},
+    {name: 'twitter:title', content: title},
+    {name: 'twitter:description', content: description},
   ];
+
+  if (canonicalUrl) {
+    tags.push({property: 'og:url', content: canonicalUrl});
+    tags.push({tagName: 'link', rel: 'canonical', href: canonicalUrl});
+  }
+
+  if (image) {
+    tags.push({property: 'og:image', content: image});
+    tags.push({name: 'twitter:image', content: image});
+  }
+
+  return tags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -62,6 +95,7 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {handle} = params;
   const {storefront} = context;
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
 
   if (!handle) {
     throw new Error('Expected product handle to be defined');
@@ -81,8 +115,21 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
+  if (
+    productRequiresAgeGate(product.tags) &&
+    !isAgeVerified(context.session)
+  ) {
+    const returnTo = localizePath(`/products/${handle}`, locale.path);
+    const verifyPath = localizePath('/age-verify', locale.path);
+    throw redirect(
+      `${verifyPath}?returnTo=${encodeURIComponent(returnTo)}`,
+    );
+  }
+
   return {
     product,
+    brand: resolveBrand(context.env),
+    brandUrl: resolveBrandUrl(context.env),
   };
 }
 
@@ -99,8 +146,9 @@ function loadDeferredData({context, params}: Route.LoaderArgs) {
 }
 
 export default function Product() {
-  const {product} = useLoaderData<typeof loader>();
-  const {t} = useI18n();
+  const {product, brand, brandUrl} = useLoaderData<typeof loader>();
+  const root = useRouteLoaderData<RootLoader>('root');
+  const {t, path} = useI18n();
 
   // Optimistically selects a variant with given available variant information
   const selectedVariant = useOptimisticVariant(
@@ -120,6 +168,13 @@ export default function Product() {
 
   const {title, descriptionHtml, totalInventory, handle} = product;
   const modelUrl = resolveProductModelUrl(product);
+  const safeDescriptionHtml = sanitizeProductHtml(descriptionHtml);
+  const brandName = brand?.name ?? root?.brand?.name ?? 'OneClick Hub';
+  const siteUrl = brandUrl ?? root?.brandUrl;
+  const productUrl =
+    siteUrl && handle
+      ? `${siteUrl}${path(`/products/${handle}`)}`
+      : path(`/products/${handle}`);
 
   return (
     <div className="product">
@@ -151,9 +206,17 @@ export default function Product() {
           <strong>{t('product.description')}</strong>
         </p>
         <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+        <div dangerouslySetInnerHTML={{__html: safeDescriptionHtml}} />
         <br />
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            productJsonLd(product, productUrl, brandName),
+          ),
+        }}
+      />
       <Analytics.ProductView
         data={{
           products: [
@@ -216,6 +279,7 @@ const PRODUCT_FRAGMENT = `#graphql
     title
     vendor
     handle
+    tags
     totalInventory
     descriptionHtml
     description

@@ -8,6 +8,7 @@ import type {
   HeaderQuery,
 } from 'storefrontapi.generated';
 import {Aside} from '~/components/Aside';
+import {SkipLink} from '~/components/SkipLink';
 import {AnnouncementBar} from '~/components/AnnouncementBar';
 import {Footer} from '~/components/Footer';
 import {Header, HeaderMenu} from '~/components/Header';
@@ -49,6 +50,7 @@ export function PageLayout({
   return (
     <Aside.Provider>
       <div className={immersiveHome ? 'layout--immersive' : undefined}>
+        <SkipLink />
         <CartAside cart={cart} />
         <SearchAside />
         <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
@@ -61,7 +63,10 @@ export function PageLayout({
             publicStoreDomain={publicStoreDomain}
           />
         )}
-        <main className={immersiveHome ? 'main--immersive' : undefined}>
+        <main
+          id="main-content"
+          className={immersiveHome ? 'main--immersive' : undefined}
+        >
           {children}
         </main>
         {!immersiveHome ? (

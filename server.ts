@@ -12,6 +12,11 @@ export default {
     env: Env,
     executionContext: ExecutionContext,
   ): Promise<Response> {
+    const url = new URL(request.url);
+    if (url.pathname === '/health' && request.method === 'GET') {
+      return Response.json({status: 'ok'});
+    }
+
     try {
       const hydrogenContext = await createHydrogenRouterContext(
         request,

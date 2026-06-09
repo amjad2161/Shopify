@@ -1,6 +1,7 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/($locale).pages.$handle';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {sanitizeProductHtml} from '~/lib/sanitize-html';
 import {
   findLocaleByPath,
   getDefaultLocale,
@@ -73,7 +74,9 @@ export default function Page() {
       <header>
         <h1>{page.title}</h1>
       </header>
-      <main dangerouslySetInnerHTML={{__html: page.body}} />
+      <main
+        dangerouslySetInnerHTML={{__html: sanitizeProductHtml(page.body)}}
+      />
     </div>
   );
 }
