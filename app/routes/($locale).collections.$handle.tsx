@@ -1,10 +1,20 @@
-import {redirect, useLoaderData} from 'react-router';
+import {redirect, useLoaderData, type MetaDescriptor} from 'react-router';
 import type {Route} from './+types/($locale).collections.$handle';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {ProductItem} from '~/components/ProductItem';
 import type {ProductItemFragment} from 'storefrontapi.generated';
+import {collectionRequiresAgeGate} from '~/lib/age-gate';
+import {redirectToAgeVerifyIfNeeded} from '~/lib/age-gate-redirect';
+import {resolveBrand, resolveBrandUrl} from '~/lib/brand';
+import {
+  breadcrumbJsonLd,
+  buildCanonicalUrl,
+  canonicalLinkMeta,
+  collectionJsonLd,
+  hreflangAlternateMetas,
+} from '~/lib/seo-meta';
 
 import {
   findLocaleByPath,
@@ -13,15 +23,38 @@ import {
   brandNameFromMatches,
   localizedPageTitle,
   translate,
+  useI18n,
 } from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data, params, matches}) => {
+export const meta: Route.MetaFunction = ({data, params, matches, location}) => {
   const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page =
     data?.collection.title ??
     translate(locale.uiLocale, 'meta.collection');
-  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
+  const title = localizedPageTitle(page, locale.uiLocale, brandName);
+  const handle = data?.collection?.handle ?? params.handle;
+  const pathname = handle ? `/collections/${handle}` : location.pathname;
+  const canonicalUrl = buildCanonicalUrl({
+    brandUrl: data?.brandUrl,
+    localePath: locale.path,
+    pathname,
+  });
+
+  const tags: MetaDescriptor[] = [
+    {title},
+    canonicalLinkMeta(canonicalUrl),
+    ...hreflangAlternateMetas(data?.brandUrl, location.pathname),
+  ];
+
+  if (data?.collection?.description) {
+    tags.push({
+      name: 'description',
+      content: data.collection.description.slice(0, 160),
+    });
+  }
+
+  return tags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -41,12 +74,21 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {handle} = params;
   const {storefront} = context;
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const paginationVariables = getPaginationVariables(request, {
     pageBy: 8,
   });
 
   if (!handle) {
     throw redirect(localizePath('/collections', params.locale));
+  }
+
+  if (collectionRequiresAgeGate(handle)) {
+    redirectToAgeVerifyIfNeeded({
+      session: context.session,
+      localePath: locale.path,
+      returnPath: `/collections/${handle}`,
+    });
   }
 
   const [{collection}] = await Promise.all([
@@ -67,6 +109,8 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   return {
     collection,
+    brand: resolveBrand(context.env),
+    brandUrl: resolveBrandUrl(context.env),
   };
 }
 
@@ -80,7 +124,12 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Collection() {
-  const {collection} = useLoaderData<typeof loader>();
+  const {collection, brandUrl} = useLoaderData<typeof loader>();
+  const {t, path} = useI18n();
+  const collectionPath = path(`/collections/${collection.handle}`);
+  const collectionUrl = brandUrl
+    ? `${brandUrl}${collectionPath}`
+    : collectionPath;
 
   return (
     <div className="collection">
@@ -98,6 +147,18 @@ export default function Collection() {
           />
         )}
       </PaginatedResourceSection>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            collectionJsonLd(collection, collectionUrl),
+            breadcrumbJsonLd([
+              {name: t('nav.home'), url: brandUrl ? `${brandUrl}${path('/')}` : path('/')},
+              {name: collection.title, url: collectionUrl},
+            ]),
+          ]),
+        }}
+      />
       <Analytics.CollectionView
         data={{
           collection: {

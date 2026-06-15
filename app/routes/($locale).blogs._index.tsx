@@ -1,8 +1,14 @@
-import {Link, useLoaderData} from 'react-router';
+import {Link, useLoaderData, type MetaDescriptor} from 'react-router';
 import type {Route} from './+types/($locale).blogs._index';
 import {getPaginationVariables} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import type {BlogsQuery} from 'storefrontapi.generated';
+import {resolveBrandUrl} from '~/lib/brand';
+import {
+  buildCanonicalUrl,
+  canonicalLinkMeta,
+  hreflangAlternateMetas,
+} from '~/lib/seo-meta';
 import {
   findLocaleByPath,
   getDefaultLocale,
@@ -14,11 +20,26 @@ import {
 
 type BlogNode = BlogsQuery['blogs']['nodes'][0];
 
-export const meta: Route.MetaFunction = ({params, matches}) => {
+export const meta: Route.MetaFunction = ({data, params, matches, location}) => {
   const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = translate(locale.uiLocale, 'blogs.heading');
-  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
+  const title = localizedPageTitle(page, locale.uiLocale, brandName);
+  const canonicalUrl = buildCanonicalUrl({
+    brandUrl: data?.brandUrl,
+    localePath: locale.path,
+    pathname: '/blogs',
+  });
+  const description = translate(locale.uiLocale, 'brand.description');
+
+  const tags: MetaDescriptor[] = [
+    {title},
+    {name: 'description', content: description},
+    canonicalLinkMeta(canonicalUrl),
+    ...hreflangAlternateMetas(data?.brandUrl, location.pathname),
+  ];
+
+  return tags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -49,7 +70,7 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
     // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {blogs};
+  return {blogs, brandUrl: resolveBrandUrl(context.env)};
 }
 
 /**

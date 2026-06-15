@@ -52,6 +52,7 @@ export const en = {
   'newsletter.body':
     'Join {brand} for launch alerts, member-only deals, and curated drops — no spam, just the good stuff.',
   'newsletter.emailLabel': 'Email address',
+  'newsletter.emailPlaceholder': 'you@example.com',
   'newsletter.subscribe': 'Subscribe',
   'newsletter.subscribing': 'Subscribing…',
   'newsletter.success': 'Thanks — you are on the list.',

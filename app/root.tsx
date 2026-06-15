@@ -83,6 +83,7 @@ export function links() {
       href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap',
     },
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {rel: 'apple-touch-icon', href: favicon},
     {rel: 'manifest', href: '/manifest.webmanifest'},
     {rel: 'stylesheet', href: experienceStyles},
   ];

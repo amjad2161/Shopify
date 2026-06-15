@@ -1,9 +1,9 @@
 import {Form, data, redirect, useLoaderData, useSearchParams} from 'react-router';
+import {useEffect} from 'react';
+import {useAnalytics} from '@shopify/hydrogen';
 import type {Route} from './+types/($locale).age-verify';
-import {
-  AGE_VERIFIED_SESSION_KEY,
-  isAgeVerified,
-} from '~/lib/age-gate';
+import {isAgeVerified, markAgeVerified} from '~/lib/age-gate';
+import {publishAgeGateEvent} from '~/lib/age-gate-analytics';
 import {
   findLocaleByPath,
   getDefaultLocale,
@@ -67,7 +67,7 @@ export async function action({request, context, params}: Route.ActionArgs) {
     );
   }
 
-  context.session.set(AGE_VERIFIED_SESSION_KEY, true);
+  markAgeVerified(context.session);
 
   const returnTo = safeReturnPath(
     String(formData.get('returnTo') ?? ''),
@@ -82,6 +82,11 @@ export default function AgeVerifyRoute() {
   const {t, path} = useI18n();
   const [searchParams] = useSearchParams();
   const returnTo = safeReturnPath(searchParams.get('returnTo'), path(''));
+  const {publish} = useAnalytics();
+
+  useEffect(() => {
+    publishAgeGateEvent(publish, {event: 'age_gate_view', returnTo});
+  }, [publish, returnTo]);
 
   return (
     <div className="age-verify mx-auto max-w-lg px-6 py-24 text-center">
@@ -90,7 +95,13 @@ export default function AgeVerifyRoute() {
       </p>
       <h1 className="font-display mt-4 text-3xl">{t('ageGate.title')}</h1>
       <p className="mt-4 text-[var(--color-ink-muted)]">{t('ageGate.body')}</p>
-      <Form method="post" className="mt-8 flex flex-col gap-4">
+      <Form
+        method="post"
+        className="mt-8 flex flex-col gap-4"
+        onSubmit={() => {
+          publishAgeGateEvent(publish, {event: 'age_gate_confirm', returnTo});
+        }}
+      >
         <input type="hidden" name="returnTo" value={returnTo} />
         <button
           type="submit"

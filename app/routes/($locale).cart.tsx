@@ -1,4 +1,4 @@
-import {useLoaderData, data, type HeadersFunction} from 'react-router';
+import {useLoaderData, data, type HeadersFunction, type MetaDescriptor} from 'react-router';
 import type {Route} from './+types/($locale).cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
@@ -7,16 +7,34 @@ import {
   findLocaleByPath,
   getDefaultLocale,
   brandNameFromMatches,
+  brandUrlFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
 } from '~/lib/i18n';
+import {
+  buildCanonicalUrl,
+  canonicalLinkMeta,
+  hreflangAlternateMetas,
+} from '~/lib/seo-meta';
 
-export const meta: Route.MetaFunction = ({params, matches}) => {
+export const meta: Route.MetaFunction = ({params, matches, location}) => {
   const brandName = brandNameFromMatches(matches);
+  const brandUrl = brandUrlFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = translate(locale.uiLocale, 'nav.cart');
-  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
+  const title = localizedPageTitle(page, locale.uiLocale, brandName);
+  const canonicalUrl = buildCanonicalUrl({
+    brandUrl,
+    localePath: locale.path,
+    pathname: '/cart',
+  });
+
+  return [
+    {title},
+    canonicalLinkMeta(canonicalUrl),
+    ...hreflangAlternateMetas(brandUrl, location.pathname),
+  ] satisfies MetaDescriptor[];
 };
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
@@ -107,9 +125,23 @@ export async function action({request, context}: Route.ActionArgs) {
   );
 }
 
-export async function loader({context}: Route.LoaderArgs) {
+import {cartRequiresAgeGate} from '~/lib/age-gate';
+import {redirectToAgeVerifyIfNeeded} from '~/lib/age-gate-redirect';
+
+export async function loader({context, params}: Route.LoaderArgs) {
   const {cart} = context;
-  return await cart.get();
+  const cartData = await cart.get();
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+
+  if (cartRequiresAgeGate(cartData?.lines?.nodes)) {
+    redirectToAgeVerifyIfNeeded({
+      session: context.session,
+      localePath: locale.path,
+      returnPath: '/cart',
+    });
+  }
+
+  return cartData;
 }
 
 export default function Cart() {

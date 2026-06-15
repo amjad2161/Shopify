@@ -17,6 +17,18 @@ export function brandNameFromMatches(matches: unknown): string {
   return brand?.name ?? BRAND.name;
 }
 
+/** Public site URL from the root loader match (for canonical / hreflang meta). */
+export function brandUrlFromMatches(matches: unknown): string | undefined {
+  if (!Array.isArray(matches)) return undefined;
+  const root = matches.find(
+    (match) =>
+      match &&
+      typeof match === 'object' &&
+      (match as {id?: string}).id === 'root',
+  ) as {data?: unknown} | undefined;
+  return (root?.data as Awaited<ReturnType<RootLoader>> | undefined)?.brandUrl;
+}
+
 export function localizedPageTitle(
   page: string | undefined,
   uiLocale: UiLocale,

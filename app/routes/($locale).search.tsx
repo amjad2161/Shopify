@@ -1,4 +1,4 @@
-import {useLoaderData} from 'react-router';
+import {useLoaderData, type MetaDescriptor} from 'react-router';
 import type {Route} from './+types/($locale).search';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {SearchForm} from '~/components/SearchForm';
@@ -16,21 +16,53 @@ import {
   findLocaleByPath,
   getDefaultLocale,
   brandNameFromMatches,
+  brandUrlFromMatches,
   localizedPageTitle,
   translate,
   useI18n,
 } from '~/lib/i18n';
+import {
+  buildCanonicalUrl,
+  canonicalLinkMeta,
+  hreflangAlternateMetas,
+} from '~/lib/seo-meta';
 
-export const meta: Route.MetaFunction = ({params, matches}) => {
+export const meta: Route.MetaFunction = ({params, matches, location}) => {
   const brandName = brandNameFromMatches(matches);
+  const brandUrl = brandUrlFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page = translate(locale.uiLocale, 'search.heading');
-  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
+  const title = localizedPageTitle(page, locale.uiLocale, brandName);
+  const canonicalUrl = buildCanonicalUrl({
+    brandUrl,
+    localePath: locale.path,
+    pathname: '/search',
+  });
+
+  return [
+    {title},
+    canonicalLinkMeta(canonicalUrl),
+    ...hreflangAlternateMetas(brandUrl, location.pathname),
+  ] satisfies MetaDescriptor[];
 };
 
-export async function loader({request, context}: Route.LoaderArgs) {
+import {searchTermRequiresAgeGate} from '~/lib/age-gate';
+import {redirectToAgeVerifyIfNeeded} from '~/lib/age-gate-redirect';
+
+export async function loader({request, context, params}: Route.LoaderArgs) {
   const url = new URL(request.url);
   const isPredictive = url.searchParams.has('predictive');
+  const term = String(url.searchParams.get('q') || '');
+  const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
+
+  if (!isPredictive && searchTermRequiresAgeGate(term)) {
+    redirectToAgeVerifyIfNeeded({
+      session: context.session,
+      localePath: locale.path,
+      returnPath: `/search?q=${encodeURIComponent(term)}`,
+    });
+  }
+
   const searchPromise: Promise<PredictiveSearchReturn | RegularSearchReturn> =
     isPredictive
       ? predictiveSearch({request, context})

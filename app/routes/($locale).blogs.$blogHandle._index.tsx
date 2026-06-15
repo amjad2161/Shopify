@@ -1,9 +1,16 @@
-import {Link, useLoaderData} from 'react-router';
+import {Link, useLoaderData, type MetaDescriptor} from 'react-router';
 import type {Route} from './+types/($locale).blogs.$blogHandle._index';
 import {Image, getPaginationVariables} from '@shopify/hydrogen';
 import type {ArticleItemFragment} from 'storefrontapi.generated';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {resolveBrandUrl} from '~/lib/brand';
+import {
+  breadcrumbJsonLd,
+  buildCanonicalUrl,
+  canonicalLinkMeta,
+  hreflangAlternateMetas,
+} from '~/lib/seo-meta';
 
 import {
   findLocaleByPath,
@@ -14,12 +21,31 @@ import {
   useI18n,
 } from '~/lib/i18n';
 
-export const meta: Route.MetaFunction = ({data, params, matches}) => {
+export const meta: Route.MetaFunction = ({data, params, matches, location}) => {
   const brandName = brandNameFromMatches(matches);
   const locale = findLocaleByPath(params.locale) ?? getDefaultLocale();
   const page =
     data?.blog.title ?? translate(locale.uiLocale, 'meta.journal');
-  return [{title: localizedPageTitle(page, locale.uiLocale, brandName)}];
+  const title = localizedPageTitle(page, locale.uiLocale, brandName);
+  const handle = data?.blog?.handle ?? params.blogHandle;
+  const pathname = handle ? `/blogs/${handle}` : location.pathname;
+  const canonicalUrl = buildCanonicalUrl({
+    brandUrl: data?.brandUrl,
+    localePath: locale.path,
+    pathname,
+  });
+  const description =
+    data?.blog?.seo?.description?.trim() ||
+    translate(locale.uiLocale, 'brand.description');
+
+  const tags: MetaDescriptor[] = [
+    {title},
+    {name: 'description', content: description},
+    canonicalLinkMeta(canonicalUrl),
+    ...hreflangAlternateMetas(data?.brandUrl, location.pathname),
+  ];
+
+  return tags;
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -61,7 +87,7 @@ async function loadCriticalData({context, request, params}: Route.LoaderArgs) {
 
   redirectIfHandleIsLocalized(request, {handle: params.blogHandle, data: blog});
 
-  return {blog};
+  return {blog, brandUrl: resolveBrandUrl(context.env)};
 }
 
 /**
@@ -74,8 +100,12 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 }
 
 export default function Blog() {
-  const {blog} = useLoaderData<typeof loader>();
+  const {blog, brandUrl} = useLoaderData<typeof loader>();
   const {articles} = blog;
+  const {path, t} = useI18n();
+  const blogPath = path(`/blogs/${blog.handle}`);
+  const blogUrl = brandUrl ? `${brandUrl}${blogPath}` : blogPath;
+  const homeUrl = brandUrl ? `${brandUrl}${path('/')}` : path('/');
 
   return (
     <div className="blog">
@@ -91,6 +121,18 @@ export default function Blog() {
           )}
         </PaginatedResourceSection>
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbJsonLd([
+              {name: t('nav.home'), url: homeUrl},
+              {name: t('blogs.heading'), url: brandUrl ? `${brandUrl}${path('/blogs')}` : path('/blogs')},
+              {name: blog.title, url: blogUrl},
+            ]),
+          ),
+        }}
+      />
     </div>
   );
 }

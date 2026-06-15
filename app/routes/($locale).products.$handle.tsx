@@ -1,4 +1,4 @@
-import {redirect, useLoaderData, useRouteLoaderData, type MetaDescriptor} from 'react-router';
+import {useLoaderData, useRouteLoaderData, type MetaDescriptor} from 'react-router';
 import type {Route} from './+types/($locale).products.$handle';
 import {
   getSelectedProductOptions,
@@ -17,9 +17,9 @@ import {
 } from '~/lib/three/map-products';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {
-  isAgeVerified,
   productRequiresAgeGate,
 } from '~/lib/age-gate';
+import {redirectToAgeVerifyIfNeeded} from '~/lib/age-gate-redirect';
 import {resolveBrand, resolveBrandUrl} from '~/lib/brand';
 import {productJsonLd} from '~/lib/product-json-ld';
 import {sanitizeProductHtml} from '~/lib/sanitize-html';
@@ -115,15 +115,12 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
-  if (
-    productRequiresAgeGate(product.tags) &&
-    !isAgeVerified(context.session)
-  ) {
-    const returnTo = localizePath(`/products/${handle}`, locale.path);
-    const verifyPath = localizePath('/age-verify', locale.path);
-    throw redirect(
-      `${verifyPath}?returnTo=${encodeURIComponent(returnTo)}`,
-    );
+  if (productRequiresAgeGate(product.tags)) {
+    redirectToAgeVerifyIfNeeded({
+      session: context.session,
+      localePath: locale.path,
+      returnPath: `/products/${handle}`,
+    });
   }
 
   return {

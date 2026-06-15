@@ -55,7 +55,7 @@ export function NewsletterStrip() {
             name="email"
             type="email"
             autoComplete="email"
-            placeholder="you@example.com"
+            placeholder={t('newsletter.emailPlaceholder')}
             required
             disabled={isSubmitting}
             aria-invalid={response?.ok === false}

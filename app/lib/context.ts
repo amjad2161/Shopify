@@ -7,20 +7,11 @@ import {
   storefrontI18nFromLocale,
 } from '~/lib/i18n';
 
-// Define the additional context object
-const additionalContext = {
-  // Additional context for custom properties, CMS clients, 3P SDKs, etc.
-  // These will be available as both context.propertyName and context.get(propertyContext)
-  // Example of complex objects that could be added:
-  // cms: await createCMSClient(env),
-  // reviews: await createReviewsClient(env),
-} as const;
-
-// Automatically augment HydrogenAdditionalContext with the additional context type
-type AdditionalContextType = typeof additionalContext;
-
 declare global {
-  interface HydrogenAdditionalContext extends AdditionalContextType {}
+  interface HydrogenAdditionalContext {
+    /** Workers Cache API instance opened in `createHydrogenRouterContext`. */
+    workerCache: Cache;
+  }
 }
 
 /**
@@ -56,7 +47,7 @@ export async function createHydrogenRouterContext(
         queryFragment: CART_QUERY_FRAGMENT,
       },
     },
-    additionalContext,
+    {workerCache: cache},
   );
 
   return hydrogenContext;

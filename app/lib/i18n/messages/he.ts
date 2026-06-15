@@ -53,6 +53,7 @@ export const he: Record<MessageKey, string> = {
   'newsletter.body':
     'הצטרפו ל-{brand} להתראות השקה, מבצעים לחברים ומבחרים בלעדיים — בלי ספאם, רק מה ששווה.',
   'newsletter.emailLabel': 'כתובת דוא״ל',
+  'newsletter.emailPlaceholder': 'you@example.com',
   'newsletter.subscribe': 'הרשמה',
   'newsletter.subscribing': 'נרשמים…',
   'newsletter.success': 'תודה — נרשמתם לרשימה.',
