@@ -1,0 +1,42 @@
+/**
+ * OneClick Hub — premium Hydrogen storefront theme (Tailwind v4)
+ */
+
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+
+  --color-ink: #0c0a09;
+  --color-ink-muted: #44403c;
+  --color-canvas: #faf8f5;
+  --color-canvas-deep: #f0ebe3;
+  --color-accent: #b45309;
+  --color-accent-soft: #fef3c7;
+  --color-line: #e7e5e4;
+  --color-success: #166534;
+
+  --shadow-soft: 0 24px 48px -24px rgb(12 10 9 / 0.18);
+  --shadow-card: 0 8px 30px -12px rgb(12 10 9 / 0.12);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[var(--color-canvas)] text-[var(--color-ink)] antialiased;
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3,
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+}

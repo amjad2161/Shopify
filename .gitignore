@@ -1,0 +1,17 @@
+node_modules
+/.cache
+/build
+/dist
+/public/build
+/.mf
+.env
+.shopify
+.react-router
+.vite
+.cursor
+*.tsbuildinfo
+.automation/reports/*
+!.automation/reports/.gitkeep
+.catalog/reports/*
+!.catalog/reports/.gitkeep
+test-results/
